@@ -1,0 +1,69 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document settings
+\documentclass{ACGSeminar}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Own Packages
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Own Definitions
+\newcommand{\comment}[1]{}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BibTex
+\bibliography{references}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hyphenations here
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\hyphenation{Sa-tan-arch-aeo-li-deal-co-hell-ish}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Title, Author, etc.
+
+\begin{document}
+
+\title{Best Topic Ever}
+
+\author{Coolest Person Ever}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abstract
+
+\begin{abstract}%
+A few words about why your topic is the best topic ever.
+\end{abstract}
+
+\keywords{Good Things, Better Things, Even Better Things Yet}
+\tableofcontents
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Introduction
+\label{cha:introduction}
+\section{Introduction}
+Introduce the best topic ever properly.
+
+\section{My Fancy Second Section}
+My second section is even better than the first one\footnote{Proof omitted.} because it contains a footnote as well as some citations~\cite{Squarepants03,Knuth97}.
+Everything else is explained in Figure~\ref{fig:dummy}. Always make sure that all figures are referenced.
+
+\begin{figure}[htb!]
+  \begin{centering}
+    \includegraphics[width=6cm]{img/thing.jpg}\par
+  \end{centering}
+  \caption{A simple dummy picture to demonstrate how to include graphics into your report.}
+  \label{fig:dummy}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliography
+\label{cha:references}
+\printbibliography
+
+\end{document}

@@ -1,0 +1,362 @@
+% ============
+% Configure Beamer Theme
+
+% Some libs
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes.misc}
+
+% Disable navigation symbols
+\beamertemplatenavigationsymbolsempty
+
+% Primary RWTH colors
+
+\definecolor{rwth-blue}{RGB}{0, 84, 159}
+\definecolor{rwth-black}{RGB}{0, 0, 0}
+\definecolor{rwth-magenta}{RGB}{227, 0, 102}
+\definecolor{rwth-yellow}{RGB}{255, 237, 0}
+\definecolor{rwth-petrol}{RGB}{0, 97, 101}
+\definecolor{rwth-turquoise}{RGB}{0, 152, 161}
+\definecolor{rwth-turquois}{RGB}{0, 152, 161}
+\definecolor{rwth-green}{RGB}{87, 171, 39}
+\definecolor{rwth-may-green}{RGB}{189, 205, 0}
+\definecolor{rwth-orange}{RGB}{246, 168, 0}
+\definecolor{rwth-red}{RGB}{204, 7, 30}
+\definecolor{rwth-bordeaux}{RGB}{161, 16, 53}
+\definecolor{rwth-violet}{RGB}{97, 33, 88}
+\definecolor{rwth-purple}{RGB}{122, 111, 172}
+
+% Faded RWTH colors
+
+\definecolor{rwth-blue-100}{RGB}{0, 84, 159}
+\definecolor{rwth-blue-75}{RGB}{64, 127, 183}
+\definecolor{rwth-blue-50}{RGB}{142, 186, 229}
+\definecolor{rwth-blue-25}{RGB}{199, 221, 242}
+\definecolor{rwth-blue-10}{RGB}{232, 241, 250}
+
+\definecolor{rwth-black-100}{RGB}{0, 0, 0}
+\definecolor{rwth-black-75}{RGB}{100, 101, 103}
+\definecolor{rwth-black-50}{RGB}{156, 158, 159}
+\definecolor{rwth-black-25}{RGB}{207, 209, 210}
+\definecolor{rwth-black-10}{RGB}{236, 237, 237}
+
+\definecolor{rwth-magenta-100}{RGB}{227, 0, 102}
+\definecolor{rwth-magenta-75}{RGB}{233, 96, 136}
+\definecolor{rwth-magenta-50}{RGB}{214, 158, 177}
+\definecolor{rwth-magenta-25}{RGB}{249, 210, 218}
+\definecolor{rwth-magenta-10}{RGB}{253, 238, 240}
+
+\definecolor{rwth-yellow-100}{RGB}{255, 237, 0}
+\definecolor{rwth-yellow-75}{RGB}{255, 240, 85}
+\definecolor{rwth-yellow-50}{RGB}{255, 245, 155}
+\definecolor{rwth-yellow-25}{RGB}{255, 250, 209}
+\definecolor{rwth-yellow-10}{RGB}{255, 253, 238}
+
+\definecolor{rwth-petrol-100}{RGB}{0, 97, 101}
+\definecolor{rwth-petrol-75}{RGB}{45, 127, 131}
+\definecolor{rwth-petrol-50}{RGB}{125, 164, 167}
+\definecolor{rwth-petrol-25}{RGB}{191, 208, 209}
+\definecolor{rwth-petrol-10}{RGB}{230, 236, 236}
+
+\definecolor{rwth-turquoise-100}{RGB}{0, 152, 161}
+\definecolor{rwth-turquoise-75}{RGB}{0, 177, 183}
+\definecolor{rwth-turquoise-50}{RGB}{137, 204, 207}
+\definecolor{rwth-turquoise-25}{RGB}{202, 231, 231}
+\definecolor{rwth-turquoise-10}{RGB}{235, 246, 246}
+
+\definecolor{rwth-turquois-100}{RGB}{0, 152, 161}
+\definecolor{rwth-turquois-75}{RGB}{0, 177, 183}
+\definecolor{rwth-turquois-50}{RGB}{137, 204, 207}
+\definecolor{rwth-turquois-25}{RGB}{202, 231, 231}
+\definecolor{rwth-turquois-10}{RGB}{235, 246, 246}
+
+\definecolor{rwth-green-100}{RGB}{87, 171, 39}
+\definecolor{rwth-green-75}{RGB}{141, 192, 96}
+\definecolor{rwth-green-50}{RGB}{184, 214, 152}
+\definecolor{rwth-green-25}{RGB}{221, 235, 206}
+\definecolor{rwth-green-10}{RGB}{242, 247, 236}
+
+\definecolor{rwth-may-green-100}{RGB}{189, 205, 0}
+\definecolor{rwth-may-green-75}{RGB}{208, 217, 92}
+\definecolor{rwth-may-green-50}{RGB}{224, 230, 154}
+\definecolor{rwth-may-green-25}{RGB}{240, 243, 208}
+\definecolor{rwth-may-green-10}{RGB}{249, 250, 237}
+
+\definecolor{rwth-orange-100}{RGB}{246, 168, 0}
+\definecolor{rwth-orange-75}{RGB}{250, 190, 80}
+\definecolor{rwth-orange-50}{RGB}{253, 212, 143}
+\definecolor{rwth-orange-25}{RGB}{254, 234, 201}
+\definecolor{rwth-orange-10}{RGB}{255, 247, 234}
+
+\definecolor{rwth-red-100}{RGB}{204, 7, 30}
+\definecolor{rwth-red-75}{RGB}{216, 92, 65}
+\definecolor{rwth-red-50}{RGB}{230, 150, 121}
+\definecolor{rwth-red-25}{RGB}{243, 205, 187}
+\definecolor{rwth-red-10}{RGB}{250, 235, 227}
+
+\definecolor{rwth-bordeaux-100}{RGB}{161, 16, 53}
+\definecolor{rwth-bordeaux-75}{RGB}{182, 82, 86}
+\definecolor{rwth-bordeaux-50}{RGB}{205, 139, 135}
+\definecolor{rwth-bordeaux-25}{RGB}{229, 197, 192}
+\definecolor{rwth-bordeaux-10}{RGB}{245, 232, 229}
+
+\definecolor{rwth-violet-100}{RGB}{97, 33, 88}
+\definecolor{rwth-violet-75}{RGB}{131, 78, 117}
+\definecolor{rwth-violet-50}{RGB}{168, 133, 158}
+\definecolor{rwth-violet-25}{RGB}{210, 192, 205}
+\definecolor{rwth-violet-10}{RGB}{237, 229, 234}
+
+\definecolor{rwth-purple-100}{RGB}{122, 111, 172}
+\definecolor{rwth-purple-75}{RGB}{155, 145, 193}
+\definecolor{rwth-purple-50}{RGB}{188, 181, 215}
+\definecolor{rwth-purple-25}{RGB}{222, 218, 235}
+\definecolor{rwth-purple-10}{RGB}{242, 240, 247}
+
+% Specific VCI design colors
+
+\definecolor{i8-titlepage-top}{RGB}{21, 77, 156}
+\definecolor{i8-titlepage-bottom}{RGB}{17, 60, 120}
+
+\definecolor{i8-title-top}{RGB}{0, 109, 199}
+\definecolor{i8-title-bottom}{RGB}{0, 80, 145}
+
+\definecolor{i8-nr-top}{RGB}{0, 109, 199}
+\definecolor{i8-nr-bottom}{RGB}{0, 83, 150}
+
+% Templates
+
+% no outer theme
+%\useoutertheme{infolines}
+% Inner Theme
+\useinnertheme{rectangles}
+
+% ============
+% Fonts
+\usefonttheme[onlymath]{serif}
+% \renewcommand{\familydefault}{\sfdefault}
+
+% ============
+% Colors
+
+\setbeamercolor{title}{fg=rwth-blue}
+\setbeamercolor{titlelike}{fg=rwth-blue}
+
+\setbeamercolor{normal text}{fg=rwth-black}
+
+\setbeamercolor{alerted text}{fg=rwth-red}
+
+\setbeamercolor{section in toc}{fg=rwth-blue}
+\setbeamercolor{subsection in toc}{fg=rwth-black}
+
+\setbeamercolor{structure}{fg=rwth-blue}
+
+% ============
+% Helper
+
+\newrobustcmd*{\footfullcitenomark}{%
+    \AtNextCite{%
+        \let\thefootnote\relax
+        \let\mkbibfootnote\mkbibfootnotetext}%
+    \footfullcite}
+
+% ============
+% Size
+
+\fboxsep0pt
+
+\newcommand{\rwthMarginLeftRight}{0.038\paperwidth}
+\newcommand{\rwthMarginRightLogo}{0.022\paperwidth}
+\newcommand{\rwthMarginFooterText}{0.0385\paperheight}
+\newcommand{\rwthFooterTextLeft}{0.10\paperwidth}
+\newcommand{\rwthFooterLogoWidth}{0.35\paperwidth}
+\newcommand{\rwthFooterLogoHeight}{0.153\paperheight}
+\newcommand{\footerHeight}{0.16\paperheight}
+\newlength{\headerHeight}
+\newlength{\frameHeight}
+
+\setbeamersize{text margin left=\rwthMarginLeftRight,text margin right=\rwthMarginLeftRight}
+
+% ============
+% Header
+\newcommand{\rwthInsertFrameTitle}{
+
+    %\color{black} \hrulefill
+    \begin{tikzpicture}[overlay]
+    \color{white}
+    \draw (0,0) circle [radius=0pt];
+    \shade[rounded corners=5pt, top color=i8-title-top, bottom color=i8-title-bottom] (-.25,10pt) rectangle  +(\paperwidth,-1);
+    % \color{black}
+    % \draw[line width=0.5pt] (0,0) -- (\paperwidth-\rwthMarginLeftRight-\rwthMarginLeftRight,0);
+    \end{tikzpicture}
+    
+    \vspace{-25pt}
+    \parbox[top][1.2cm][b]{\textwidth}{
+        \color{white}
+        \textbf{\Large \insertframetitle}
+        \vphantom{p} % force "p-line"
+    }
+    \vspace{2pt}
+
+    \ifx\insertframesubtitle\empty
+    \else
+    \vspace{0.6em}
+    \color{black}
+    \textbf{\large \insertframesubtitle}
+    \vspace{0.5em}
+    \fi
+}
+\setbeamertemplate{frametitle}{
+    \rwthInsertFrameTitle
+}
+
+\newcommand{\updateFrameHeight}
+{
+    \settototalheight\headerHeight{\vbox{\rwthInsertFrameTitle}}
+    \addtolength{\headerHeight}{1.6em}
+    \setlength{\frameHeight}{\textheight-\headerHeight}
+}
+
+% patch frame(sub)title to automatically update \frameHeight
+% BREAKS cites, multi-frame frames :(
+%\let\beamerOldFrametitle\frametitle
+%\renewcommand{\frametitle}[1]{\beamerOldFrametitle{#1}\updateFrameHeight}
+%\let\beamerOldFramesubtitle\framesubtitle
+%\renewcommand{\framesubtitle}[1]{\beamerOldFramesubtitle{#1}\updateFrameHeight}
+
+% ============
+% Footer
+
+% Extra data
+\newcommand{\footlineextra}[1]{\gdef\insertfootlineextra{#1}}
+\footlineextra{}
+
+% Remove footnote rule
+\renewcommand*{\footnoterule}{}
+
+\def\rwthOptionTitlePage{}
+\def\rwthOptionNoNumbering{}
+\setbeamertemplate{footline}
+{
+    \begin{tikzpicture}[overlay]    
+        % show rest only if non-lean
+        \ifthenelse{\equal{\rwthOptionTitlePage}{lean}}{}
+        {
+            % page nr
+            \shade[rounded corners=5pt, top color=i8-nr-top, bottom color=i8-nr-bottom] (\rwthMarginLeftRight-.25cm,-\rwthMarginFooterText) rectangle +(1, +1.7);
+        }
+    \end{tikzpicture}
+    \begin{tikzpicture}
+        % anchor coord system
+        \color{white}
+        \draw (0,0) circle [radius=0pt];
+
+        % logo
+        \node[below left](Footerlogo) at (\paperwidth-\rwthMarginRightLogo, 0) {\includegraphics[height=\rwthFooterLogoHeight]{i8style/rwth_vci_rgb_white.png}};
+
+        % show rest only if non-lean
+        \ifthenelse{\equal{\rwthOptionTitlePage}{lean}}{}
+        {
+            % page nr
+            \color{white}
+            \tiny
+            \ifx\rwthOptionNoNumbering\empty
+                \node[below] at (\rwthMarginLeftRight+.18cm,-\rwthMarginFooterText-3pt) {\textbf{\centering\large\insertframenumber}};
+            \fi
+
+            % footer text
+            \color{rwth-blue}
+            \tiny
+            \node[below right, text width=\paperwidth-\rwthMarginLeftRight-\rwthFooterLogoWidth-\rwthFooterTextLeft] at (\rwthFooterTextLeft,-\rwthMarginFooterText) {
+                \insertshortauthor\\
+                \insertshorttitle\\
+                \insertdate
+                };
+
+            % horizontal line
+            % \color{black}
+            % \draw[line width=0.5pt] (\rwthMarginLeftRight,0) -- (\paperwidth-\rwthMarginLeftRight,0);
+        }
+
+    \end{tikzpicture}
+}
+
+% Custom Title Pages
+
+\newcommand{\rwthSubtitleOrAuthor}{\ifx\insertsubtitle\empty\insertauthor\else\insertsubtitle\fi}
+
+\newcommand{\rwthTitlepageColor}[1][lean]{
+    \def\rwthOptionTitlePage{#1}
+    \begin{frame}[noframenumbering]
+        \begin{tikzpicture}[remember picture,overlay]
+            % colored tile
+            \node[inner sep=0pt] (topleft) at (current page.north west) {};
+            \node[below = 0.3333\paperheight-2pt of topleft,inner sep=0pt] (tileend) {};
+            \shade[top color=i8-titlepage-top,bottom color=i8-titlepage-bottom,inner sep=0pt] (tileend) rectangle +(\paperwidth, 0.3333\paperheight);
+
+            % Title
+            \node[below right = 0.3333\paperheight+0.0167\paperheight and 1em of topleft] (titlestart) {
+                \color{rwth-blue}
+                \adjustbox{max width=\textwidth}{\textbf{\Large \inserttitle}}
+                };
+            % Subtitle
+            \node[below right] (subtitlestart) at (titlestart.south west) {
+                \color{black}
+                \large \rwthSubtitleOrAuthor
+                };
+        \end{tikzpicture}
+    \end{frame}
+    \def\rwthOptionTitlePage{}
+}
+
+\newcommand{\rwthTitlepagePicture}[2][lean]{
+    \def\rwthOptionTitlePage{#1}
+    \begin{frame}[noframenumbering]
+        \begin{tikzpicture}[remember picture,overlay]
+        % colored tile
+        \node[inner sep=0pt] (topleft) at (current page.north west) {};
+        \node[below = 0.3333\paperheight-2pt of topleft,inner sep=0pt] (tileend) {};
+        %\fill[rwth-blue] (tileend) rectangle +(\paperwidth, 0.3333\paperheight);
+
+        % Title img
+        \node[above right,inner sep=0pt] at (tileend) {\includegraphics[width=\paperwidth]{#2}};
+
+        % Title
+        \node[below right = 0.3333\paperheight+0.0167\paperheight and 1em of topleft] (titlestart) {
+            \color{rwth-blue}
+            \adjustbox{max width=\textwidth}{\textbf{\Large \inserttitle}}
+        };
+        % Subtitle
+        \node[below right] (subtitlestart) at (titlestart.south west) {
+            \color{black}
+            \large \rwthSubtitleOrAuthor
+        };
+        \end{tikzpicture}
+    \end{frame}
+    \def\rwthOptionTitlePage{}
+}
+
+\newcommand{\rwthTitlepagePictureLarge}[2][lean]{
+    \def\rwthOptionTitlePage{#1}
+    \begin{frame}[noframenumbering]
+        \begin{tikzpicture}[remember picture,overlay]
+        % colored tile
+        \node[inner sep=0pt] (topleft) at (current page.north west) {};
+        \node[below = 0.6666\paperheight-2pt of topleft,inner sep=0pt] (tileend) {};
+        %\fill[rwth-blue] (tileend) rectangle +(\paperwidth, 0.6666\paperheight);
+
+        % Title img
+        \node[above right,inner sep=0pt] at (tileend) {\includegraphics[width=\paperwidth]{#2}};
+
+        % Title
+        \node[below right = 0.6666\paperheight+0.0167\paperheight and 13pt of topleft] (titlestart) {
+            \color{rwth-blue}
+            \adjustbox{max width=\textwidth}{\textbf{\Large \inserttitle}}
+        };
+        % Subtitle
+        \node[below right] (subtitlestart) at (titlestart.south west) {
+            \color{black}
+            \large \rwthSubtitleOrAuthor
+        };
+        \end{tikzpicture}
+    \end{frame}
+    \def\rwthOptionTitlePage{}
+}

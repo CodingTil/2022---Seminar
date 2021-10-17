@@ -1,0 +1,136 @@
+\documentclass[aspectratio=43,sanserif,professionalfonts]{beamer}
+% valid values for aspectratio are 43 (4:3), 169 (16:9), 1610 (16:10)
+
+% Default/core packages
+\usepackage{graphicx}
+\usepackage[english]{babel} % or [german]
+\usepackage{helvet}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usepackage{calc}
+\usepackage{hyperref}
+\usepackage{xifthen}
+\usepackage{etoolbox}
+\usepackage{adjustbox}
+
+% ====================
+
+% Apply i8 styling
+\input{i8style/i8style.tex}
+
+% ====================
+% Title
+\title[The Perfect Krabby Patty] % (optional short title, used for the footer)
+{The Perfect Krabby Patty and How to Make It}
+
+% ====================
+% Author
+\author{Spongebob Squarepants}
+\institute[Visual Computing Group]
+{
+    Computer Graphics and Multimedia \\
+    Prof.~Dr.~Leif~Kobbelt \\
+    RWTH Aachen University
+}
+
+% ====================
+% Date
+\date{\today}
+
+% ====================
+% Subject
+\subject{Computer Graphics}
+
+% ====================
+% Extra footer lines
+\footlineextra{}
+
+% ====================
+% Start document
+\begin{document}
+  \rwthTitlepagePictureLarge{img/arch.jpg} % banner image 2/3 of slide size
+  % alternative title pages:
+  % \rwthTitlepagePicture{img/arch.jpg} % banner image 1/3 of slide size
+  % \rwthTitlepageColor % blue background 1/3 of slide size
+
+  \begin{frame}
+    \frametitle{Example Slide}
+    \framesubtitle{... with some blindtext.}
+
+    Example text goes here.
+
+    \begin{itemize}
+      \item some
+      \item bullet
+      \item points
+    \end{itemize}
+    
+    And a formula. Why not?
+    \[ \min_{\mathbf{Q}} \sum_i \left\| \mathbf{A}_i \mathbf{Q} - \mathbf{P}_i(\mathbf{A}_i \mathbf{Q}) \right\|^2_\mathrm{F} \]
+  \end{frame}
+  
+  \begin{frame}
+    \frametitle{Multicolumn Layouts}
+    
+    \begin{columns}
+      \begin{column}{0.45\textwidth}
+        One column on the left with a picture (yum):
+        
+        \includegraphics[width=\textwidth]{img/krabby-patty}
+      \end{column}
+      \begin{column}{0.45\textwidth}
+        Another column on the right.
+        
+        \vspace*{1.0em} % extra vertical space
+        
+        Let's also have a table:
+        
+        \vspace*{1.0em} % extra vertical space
+        
+        \begin{tabular}{cc|c}
+          $a$ & $b$ & $a \land b$ \\ \hline
+          F   & F   & F \\
+          F   & T   & F \\
+          T   & F   & F \\
+          T   & T   & T
+        \end{tabular}
+        
+        \vspace*{1.0em} % extra vertical space
+        
+        More fascinating text with \textbf{\color{rwth-blue}important} information.
+      \end{column}
+    \end{columns}
+  \end{frame}
+
+  \begin{frame}
+    \frametitle{Animations}
+    
+    Guide the viewers' attention by revealing contents \pause piece \pause by \pause piece.
+    
+    \vspace*{1.0em}
+    \pause
+    
+    Also works for
+    \begin{itemize}
+      \item enumerations
+      \pause
+      \item and many other things
+    \end{itemize}
+  \end{frame}
+  
+  \begin{frame}
+    \frametitle{Animations, Pt.\ 2}
+    
+    Use animations to develop figures and formulas, e.\,g.:
+    
+    \includegraphics<1>[width=\textwidth]{img/checks-1}%
+    \includegraphics<2>[width=\textwidth]{img/checks-2}%
+    \includegraphics<3>[width=\textwidth]{img/checks-3}%
+    \includegraphics<4->[width=\textwidth]{img/checks-4}%
+    
+    \visible<5->{\[
+      \mathbf{\hat Q}^{k+1} = \mathbf{Q}(\alpha^*)
+      \visible<6->{+ \beta \tilde F(\mathbf{Q}(\alpha^*))}
+    \]}
+  \end{frame}
+\end{document}
