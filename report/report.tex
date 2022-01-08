@@ -5,10 +5,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Own Packages
 \usepackage{amsmath}
+\usepackage{wrapfig}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Own Definitions
 \newcommand{\comment}[1]{}
+
+\DeclareMathOperator{\rot}{rot}
+\DeclareMathOperator*{\argmin}{arg\,min}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,7 +68,7 @@ In computer graphics, there are many possible ways to represent surfaces of digi
 
 A polygonal mesh is a set of polygonal faces, each representing a 2D surface embedded in 3D. Each face consists of a vertex, a 3D point, and edges connecting these vertices. The idea behind polygonal meshes is \textit{cell decomposition}: a complex digital geometry is composed of numerous simple polygonal cells \cite{bommes2013quad}. This allows for performance optimization and reduction of complexity since as an example geometrical formulas on simple polygons are often already predefined. It is very desirable to reduce the number of vertices of each polygonal face to remove complexity. Therefore, polygonal meshes with only very few vertices per face are dominant in computer graphics and geometry processing. The most common categories are triangle meshes and quad meshes. The best type of polygon for a mesh depends on its application.\bigskip
 
-\textbf{Quad meshes} are meshes, where each cell is a quadrilateral. They have a tensor product structure, which is beneficial to many applications such as spline fitting. Because quad meshes have this mathematical benefit, many algorithms are better suited for quad meshes than triangle meshes. Hence they play a major role in computer graphics and geometry processing \cite{bommes2013quad, chen2019quadrilateral}.
+\textbf{Quad meshes} are meshes, where each cell is a quadrilateral. They have a tensor product structure, which is beneficial to many applications such as spline fitting. Because quad meshes have this mathematical benefit, many algorithms are better suited for quad meshes than triangle meshes. Hence, they play a major role in computer graphics and geometry processing \cite{bommes2013quad, chen2019quadrilateral}.\bigskip
 
 Although the quality of a quad mesh isn't specifically defined, there are some indices of a high-quality quad mesh - depending on the application -, such as flat and square faces, and vertices of valency 4. Creating a high-quality pure-quad mesh is a quite challenging task, however. When the geometry's surface has boundaries and curvatures forcing the meshes grid, which is created by square faces, to conform to them, singularities are unavoidable. A \textbf{Singularity} in a mesh is a vertex with irregular valency, a regular valency in a quad mesh, of course, being 4 \cite{fogg2017simple,fogg2018singularities}.
 
@@ -76,9 +80,9 @@ Although the quality of a quad mesh isn't specifically defined, there are some i
 	\label{fig:singularities}
 \end{figure}
 
-Because handling these singularities is complicated on its own, oftentimes meshing algorithms resort to quad-dominant meshes. \textbf{Quad-dominant meshes} are meshes, where the majority of faces are quadrilaterals, with some being triangles or pentagons. A quad-dominant mesh can however be converted into a pure-quad mesh through a subdivision step \cite{jakob2015instant}.\bigskip
+Because handling these singularities is complicated on its own, oftentimes meshing algorithms resort to quad-dominant meshes. \textbf{Quad-dominant meshes} are meshes, where the majority of faces are quadrilaterals, with some being triangles or pentagons. A quad-dominant mesh can however be converted into a pure-quad mesh through a Catmull-Clark subdivision step (\cite{catmull1978recursively}) \cite{jakob2015instant}.\bigskip
 
-When a tensor product structure is not needed, often \textbf{triangle meshes} are used because of the reduced number of vertices in comparison to quad meshes, resulting in simplified geometrical calculations. Additionally, triangle meshes are always and easily computation-wise composed purely of triangular faces, that are of course by nature always flat. Because of these benefits, modelling a triangle mesh from data or even scratch can be a lot easier than modelling quad meshes. As an example, 3D scans produce triangle meshes, although often very nonuniform.\bigskip
+When a tensor product structure is not needed, often \textbf{triangle meshes} are used because of the reduced number of vertices in comparison to quad meshes, resulting in simplified geometrical calculations. Additionally, triangle-dominant meshes can be easily and efficiently remeshed as meshes purely of triangular faces, that are of course by nature always flat. Because of these benefits, modelling a triangle mesh from data or even scratch can be a lot easier than modelling quad meshes. As an example, 3D scans produce triangle meshes, although often very nonuniform.\bigskip
 
 \begin{figure}[htb!]
 	\begin{centering}
@@ -94,13 +98,13 @@ A mesh is \textbf{uniform} when its faces are as "uniform" as possible. This mea
 \subsection{Global and local remeshing}
 As already stated, many meshes are created through automatic processes like 3D scanning, which do often result into low quality meshes. For many geometry processing algorithms these meshes are dissatisfactory and will result in performance and quality losses. So there is a need to reduce the complexity of these meshes, to improve their quality, and sometimes even transform them into an entirely different type of mesh. This process is called \textbf{remeshing} \cite{alliez2008recent}.\bigskip
 
-Although there are several central issues to all remeshing techniques, one especially complex one is to find the corresponding location of a new vertex on the input mesh. This is where all remeshing techniques are categorized into two classes: Global remeshing and local remeshing.\bigskip
+Although there are several central issues to all remeshing techniques, one especially complex one is to find the corresponding location of a new vertex on the input mesh. This is where all remeshing techniques are categorized into two classes: Global remeshing and local remeshing \cite{botsch2007geometric,alliez2008recent}.\bigskip
 
 \textbf{Global remeshing} tackles the correspondence problem through mesh parameterization. Mesh parameterization is the process of finding a parametric equation of the meshes surface. Since the input and output mesh should share the same surface, finding the corresponding location of a new vertex on the input mesh is quite uncomplicated, given that the parametric equation is known. Therein lies the main drawback with this global approach: Determining a parametric equation of a surface is a challenge, which can be quite computationally expensive and suffer from inaccuracy amongst other issues. However, if the input mesh was successfully parameterized, a high quality mesh can easily be produced \cite{jakob2015instant,alliez2008recent}.
 
 To sum up, global remeshing techniques suffer from efficiency and simplicity, however can yield high quality meshes. A few great approaches to this technique are the "Mixed-Integer Quadrangulation" algorithm by Bommes et al. and "Periodic Global Parameterization" by Alliez et al.\bigskip
 
-On the other hand there are \textbf{local remeshing} techniques. These algorithms do without mesh parameterization and rather work directly on the surface itself. Also, instead of creating an entirely new output mesh, local remeshing algorithms locally modify the input mesh itself, such as adding, relocating, and removing vertices. During these modifications, the vertices are always forced to rest on the surface or rather mesh. \textbf{2D 3D?!?!?!??! TODO !=!=!=!==!=!=}. This process is highly scalable, robust and simple. However, since the process is limited to only local information at a time, it is limited. Hence, local remeshing techniques usually tend to be of lower quality than global remeshing techniques, and also introduce mesh singularities due to its locality \cite{jakob2015instant,alliez2008recent}. \textbf{ANOTHER PAPER=!=!=!}
+On the other hand there are \textbf{local remeshing} techniques. These algorithms do without global mesh parameterization and rather work directly on the surface itself. Also, instead of creating an entirely new output mesh, local remeshing algorithms locally modify the input mesh itself using topological operations, such as adding, relocating, and removing vertices. During these modifications, the vertices are always forced to rest on the surface or rather mesh. \textbf{2D 3D?!?!?!??! TODO !=!=!=!==!=!=}. This process is highly scalable, robust and simple. However, since the process is limited to only local information at a time, it is limited. Hence, local remeshing techniques usually tend to be of lower quality than global remeshing techniques, and also introduce mesh singularities due to its locality \cite{jakob2015instant,alliez2008recent}. \textbf{ANOTHER PAPER=!=!=!}
 
 
 \subsection{$N$-RoSy fields}\label{rosy}
@@ -156,42 +160,256 @@ As mentioned, the algorithm takes the geometry's surface represented as a graph 
 	\item	For meshes $\mathcal{E}$ is equal to the usual set of edges in the mesh.
 	\item	For point clouds $(i,j) \in \mathcal{E}$, if the vertex $i$ is in the set of $K$-nearest neighbors of $j$.
 \end{itemize}
-We denote the neighborhood of a vertex $i$ by $\mathcal{N}(i) = \{j \in \mathcal{V} \mid (i,j) \in \mathcal{E}\}$. Additionally, there is a weight $w_{ij}$ for each edge $(i,j) \in \mathcal{E}$. This weight affects the smoothing of the orientation- and position-field later on, and can be chosen geometry-dependent or as uniform.\bigskip
+We denote the neighborhood of a vertex $i$ by $\mathcal{N}(i) = \{j \in \mathcal{V} \mid (i,j) \in \mathcal{E}\}$. Additionally, there is a weight $w_{ij}$ for each edge $(i,j) \in \mathcal{E}$. These weights affect the smoothing of the orientation- and position-field later on, and can be chosen geometry-dependent or as uniform (equal to $1$).\bigskip
 
 This simple input representation allows for many geometry representations to be used in this algorithm, as long as one can convert it into the described graph input format.
 
 % Fields
 \subsection{Fields}
-FROM 3.1 COMPUTE SMOOTH FIELDS
+Based on the input graph the algorithm now computes an $N$-RoSy field parameter-free. This field, which we will call \textbf{orientation field}, represents a set of directions on the input geometry which the edges of the output mesh should align to. To calculate this step, the algorithm locally optimizes the field's smoothness energy using integer rotations to either naturally align with the surfaces features (\textbf{intrinsic}) or to automatically snap to the geometries edges (\textbf{extrinsic}). Afterwards, this orientation field is used to calculate a positional symmetry field (PoSy field, or \textbf{position field}). Using integer translations, a parameterization is calculated for each vertex locally, and its gradient is fixed to be aligned to the orientation field. Then, the algorithm also minimizes this fields smoothness energy, either intrinsically or extrinsically \cite{jakob2015instant}.\bigskip
 
-\subsubsection{Orientation field}
+The following mechanisms require only a few user-defined parameters:
 \begin{itemize}
-	\item	What for? (why is it important)
-	\item	Computation (intrinsic vs extrinsic)
-	\item	Singularities
+	\item	Whether the output mesh should be a triangle mesh or a quad-dominant mesh: $s_o = 6$ or $s_o = 4$ resp.
+	\item	The desired edge length $\rho$ in the output mesh.
+	\item	Whether the fields should be calculated intrinsically or extrinsically.
 \end{itemize}
+
+\subsubsection{Orientation field}\label{orientation-field}
+In the first step of the algorithm, we compute an $s_o$-RoSy field (section \ref{rosy}), which we call \textbf{orientation field}. This field will align the edges in the output mesh.\bigskip
+
+Briefly, to compute this orientation field, we find all integer rotations of the vertices/edges in our input graph $\mathcal{G}$ and then smooth out neighboring directions in the resulting field. This process is heavily inspired by the works of \cite{bommes2009mixed,ray2008n}, however works completely locally and is thus much simpler, while still giving comparable results \cite{jakob2015instant}.
+
+\paragraph{Symmetry group.}
+In the (isotropic) output mesh each vertex has 3 or 4 directions, which the edges face in. They are aligned by this orientation field, which is calculated only on the input graph $\mathcal{G}$. Therefore, we need to assign each $i \in \mathcal{V}$ a \textit{representative} direction $o_i \in \mathbb{R}^3$. The initial value of $o_i$ has no influence in the final result, as it is used to create integer rotations around the normal direction $n_i$ of vector $i$ and will be optimized.\bigskip
+
+\begin{wrapfigure}{r}{3cm}
+	\includegraphics[width=3cm]{img/integer-rotation.png}\par
+	\label{fig:integer-rotation}
+\end{wrapfigure}
+
+The authors denote the rotation matrix by angle $\theta$ about vector $n$ as $\rot(n, \theta)$. Now we can express an integer rotation of a representative vector $o$ about a fixed normal $n$ as $\mathcal{R}_{s_o}(o,n,k)$, and the set of all integer rotations of $o$ about $n$ as $\mathcal{R}_{s_o}(o,n)$:
+\begin{equation*}
+\begin{split}
+	& \mathcal{R}_{s_o}(o,n,k) \coloneqq \rot(n, k \cdot \frac{2\pi}{s_o})o, \quad k \in \mathbb{Z} \\
+	& \mathcal{R}_{s_o}(o,n) \coloneqq \{\mathcal{R}_{s_o}(o,n,0), \dots, \mathcal{R}_{s_o}(o,n,s_o-1)\}
+\end{split}
+\end{equation*}
+So, before any optimization, the orientation field consists of all the directions in $\mathcal{R}_{s_o}(o_i, n_i)$ for every vertex $i \in \mathcal{V}$.
+
+\paragraph{Intrinsic smoothness.}
+As already mentioned, the authors based their methods on the work of \cite{ray2008n,bommes2009mixed}. Here, they propose to minimize the smoothness energy of an $N$-RoSy field by smoothening out the angle difference between nearby vectors. To do so, vectors are being folded into a common plane (figure \ref{fig:orientation-field-intrinsic-extrinsic}, top), thus maintaining the intrinsic properties of the surface \cite{jakob2015instant}.\bigskip
+
+Since each vertex has $s_o$ representative direction vector, the authors encode this inconvenience through integer variables $k_{ij} \in \mathbb{Z}$ for each edge $(i,j) \in \mathcal{E}$ and store them in a vector $k \in \mathbb{Z}^{2 \vert \mathcal{E} \vert}$.
+
+We can now calculate the smoothness energy of the entire $s_o$-RoSy field $O$ as:
+\begin{equation}\label{eq:orientation-isotropic-energy}
+	E_i(O,k) \coloneqq \sum_{i \in \mathcal{V}} \sum_{j \in \mathcal{N}(i)} \angle(o_i, \mathcal{R}_{s_o}(o_{ji}, n_i, k_{ij}))^2,
+\end{equation}
+where $o_{ji}$ is the representative vector $o_j$ at vertex $j$, folded into the tangent plane of vertex $v_i$. It is defined as the following:
+\begin{equation*}
+	o_{ji} \coloneqq \rot(n_j \times n_j, \angle(n_j, n_i))o_j
+\end{equation*}
+A low smoothness energy results in a more uniform, isotropic, and higher quality output mesh. So it is the goal to minimize it. In order to do so, one must find optimal values for each $o_j$ and $k_{ij}$ \cite{jakob2015instant}.\bigskip
+
+While \cite{bommes2009mixed} proposed to minimize the smoothness energy globally, the approach this algorithm follows is a local optimization using iteration over all vertices of $\mathcal{V}$. Hence, this approach is a lot less complex than global ones, while still yielding comparable results.
+
+Whenever the iteration visits the vertex $i$, the algorithm first determines optimal integer variables $k_{ij}$ by a brute-force search:
+\begin{equation}\label{eq:orientation-intrinsic-integer}
+	k_{ij} \coloneqq \argmin_{0 \leq k' < s_o} \angle(o_j, \mathcal{R}_{s_o}(o_ji, n_i, k'))
+\end{equation}
+By doing so, the algorithm can already find improved values for $\mathcal{R}_{s_o}(o_{ji}, n_i, k_{ij})$ in the smoothness energy equation \eqref{eq:orientation-isotropic-energy}.
+
+Now, we can further optimize the representation direction vectors $o_i$ for each index by:
+\begin{equation}\label{eq:orientation-intrinsic-vector}
+\begin{split}
+	& o_i \leftarrow \sum_{j \in \mathbb{N}(i)} w_{ij} \cdot \mathbb{R}_{s_o}(o_{ji}, n_i, j_{ij})\\
+	& o_i \leftarrow \frac{o_i}{\Vert o_i \Vert}
+\end{split}
+\end{equation}
+Here, the weighing $w_{ij}$ of edges can be used to guide the orientation field in certain directions at certain locations \cite{jakob2015instant}.\bigskip
+
+The authors have found, however, that this process can be greatly improved when recalculating after visiting each edge. So we can improve the process \eqref{eq:orientation-intrinsic-vector}:
+\begin{equation}
+\begin{split}
+	& o_i' \leftarrow w_{ij_1} \cdot \mathcal{R}_{s_o}(o_{j_1i}, n_i, k_{ij_1}), \qquad o_i \leftarrow \frac{o_i'}{\Vert o_i' \Vert}\\
+	& \textrm{recompute all } k_{ij}\\
+	& o_i' \leftarrow o_j' + w_{ij_2} \cdot \mathcal{R}_{s_o}(o_{j_2i}, n_i, k_{ij_2}), \qquad o_i \leftarrow \frac{o_i'}{\Vert o_i' \Vert}\\
+	& \textrm{recompute all } k_{ij}\\
+	& \dots
+\end{split}
+\end{equation}
+where $j_1, j_2, \dots \in \mathcal{N}(i)$.
+
+\begin{figure}[htb!]
+	\begin{centering}
+		\includegraphics[width=8cm]{img/orientation-field-intrinsic-extrinsic.png}\par
+	\end{centering}
+	\caption{Optimizing the smoothness of the orientation $s_o$-RoSy field intrinsically \textit{(top)} and extrinsically \textit{(bottom)}. \cite{jakob2015instant}}
+	\label{fig:orientation-field-intrinsic-extrinsic}
+\end{figure}
+
+\paragraph{Extrinsic smoothness.}
+There is a downside to this intrinsic calculation: Two vectors are always folded into a common plane. While this is efficient, we lose often desirable information about the curvature of the geometry. This behavior is illustrated in figure \ref{fig:orientation-field-illustration} The also parameter-free alternative that the authors propose can naturally align with edges in the geometry. They achieve this, by not folding two vectors into a common plane, but rather leaving them in embedded space. In addition, we can now always the symmetry vectors of both vectors \cite{jakob2015instant}.\bigskip
+
+To do so, we must apply some modifications to the previous formulas:
+The extrinsic smoothness now is:
+\begin{equation}\label{eq:orientation-extrinsic-energy}
+	E_e(O,k) \coloneqq \sum_{i \in \mathcal{V}} \sum_{j \in \mathcal{N}(i)} \angle(\mathcal{R}_{s_o}(o_{i}, n_i, k_{ij}, \mathcal{R}_{s_o}(o_{ji}, n_j, k_{ji}))^2,
+\end{equation}
+The brute force search from equation \eqref{eq:orientation-intrinsic-integer} now changes to the following:
+\begin{equation}\label{eq:orientation-extrinsic-integer}
+	(k_{ij}, k_{ji}) \coloneqq \argmin_{0 \leq k',k'' < s_o} \angle(\mathcal{R}_{s_o}(o_i, n_i, k'), \mathcal{R}_{s_o}(o_j, n_j, k''))
+\end{equation}
+Finally, we can also adapt the algorithm to optimize $o_i$ and its iterative improvement \eqref{eq:orientation-intrinsic-vector} to fit these conditions \cite{jakob2015instant}.
+
+\begin{figure}[htb!]
+	\begin{centering}
+		\includegraphics[width=8cm]{img/orientation-field-illustration.png}\par
+	\end{centering}
+	\caption{Orientation fields after optimizing the smoothness energy intrinsically \textit{(left)} and extrinsically \textit{(right)}. \cite{jakob2015instant}}
+	\label{fig:orientation-field-illustration}
+\end{figure}
+
+\paragraph{Singularities.}
+Since the orientation field is a $N$-RoSy field, singularities can naturally occur (section \ref{rosy}). The singularities in an orientation field do affect the orientation of points in that specific location, but in the output mesh only correspond to irregular vertices \cite{jakob2015instant}.
 
 \subsubsection{Position field}
-\begin{itemize}
-	\item	What for? (why is it important)
-	\item	Computation (intrinsic vs extrinsic)
-	\item	Singularities
-\end{itemize}
+Now that we have created and optimized the $s_o$-RoSy orientation field $O$ we can move on to the next step, which is computing the \textbf{position field}. This field is per construction perfectly aligned with the orientation field, and will specify the location of vertices on the output mesh \cite{jakob2015instant}.\bigskip
 
-% Multiresoluion hierarchy
+Again, this calculation is based on the works of \cite{bommes2009mixed} and \cite{ray2006periodic}. To create such a position field, previous methods proposed the computation of a global parameterization of the surface. This would allow to map the surface into 2 dimensions ($(u,v)$-parameterization), then place a grid of triangles or quadrilaterals onto that plane, and then lift the mesh back into 3 dimensional space. However, such global algorithms are complex to implement, very sensitive to topological noise, and, most importantly, do not scale with the size of the input graph well at all \cite{jakob2015instant}.\bigskip
+
+This algorithm tackles the same problem through a local solution yet again: It computes a local parameterization for each vertex instead of finding a continuous parameterization function for the entire mesh. Similarly to the orientation field, the algorithm then locally minimizes the smoothness energy between neighboring local parameterizations. To be more specific, the smoothness between two such local parameterizations refers to the similarity between them up to integer translations \cite{jakob2015instant}.
+
+\begin{wrapfigure}{r}{3cm}
+	\includegraphics[width=3cm]{img/integer-translation.png}\par
+	\label{fig:integer-translation}
+\end{wrapfigure}
+
+\paragraph{Symmetry group.}
+The authors propose a simple, yet efficient encoding for the local parameterization of a vertex $i$: The parameterization's gradient is then fixated to be exactly aligned with the orientation field $o_i$ at $i$ (section \ref{orientation-field}).
+
+Since the gradient is fixated by $o_i$, we can then encode the local parameterization of vertex $i$ in a point $p_i \in \mathbb{R}^3$. \cite{jakob2015instant} proposes this point $p_i$ to be the closest lattice point to $i$.
+
+Let $s_p = m \cdot s_o, m \in \mathbb{N}$. The local parameterization is the of course invariant under rotations by integer multiples of $\frac{2\pi}{s_p}$ (section \ref{orientation-field}: Symmetry group.). But more importantly, it is invariant under integer translations of $\rho$ along the $s_p$ symmetry axes \cite{jakob2015instant}.\bigskip
+
+Let $s_p$ be even. Integer translations of a position $p \in \mathbb{R}^3$ about $\rho$ and the set of all its possible integer translations are defined as:
+\begin{equation*}
+\begin{split}
+	& \mathcal{T}_{s_p}(p,n,o,t) \coloneqq p + \rho \cdot \sum_{k=0}^{\frac{s_p}{2}-1} t_k \mathcal{R}_{s_p}(o,n,k)\\
+	& \mathcal{T}_{s_p}(p,n,o) \coloneqq \{\mathcal{T}_{s_p}(p,n,o,t) \mid t \in \mathbb{Z}^{\frac{s_p}{2}}\}.
+\end{split}
+\end{equation*}
+Since $s_p$ is even, the sum over $\frac{s_p}{2}$ terms ensures that each orientation- (or rather translation-) axis is considered once. Each integer $t_k$ then translates $p$ by $\rho$ units in the specific axis.
+
+Given the local parameterization for each vertex, we can now define the position field $P$ as the set of all integer translations $\mathbb{T}_{s_p}(p_i, n_i, o_i)$ from each vertex $i$ \cite{jakob2015instant}.
+
+\paragraph{Intrinsic smoothness.}
+Similar to the orientation field, we again introduce new integer variables due to the ambiguity of symmetry: For each edge $(i,j) \in \mathcal{E}$ there is an integer vector $t_{ij} \in \mathbb{Z}^{\frac{s_p}{2}}$, representing integer jumps in the integer translation. For the sake of simplicity, we again store these variables in a vector $t$.\bigskip
+
+We can now measure the intrinsic smoothness energy of the position field $P$ by:
+\begin{equation*}
+	E_i(P,t) \coloneqq \sum_{i \in \mathcal{V}} \sum_{j \in \mathcal{N}(i)} \Vert p_i - \mathcal{T}_{s_p}(p_{ji}, n_i, o_i, t_{ij})^2_2
+\end{equation*}
+$p_{ji}$ represents $p_j$ of vertex $j$ after being rotated into the tangent plane of $v_i$. It is defined as the following:
+\begin{equation*}
+	p_{ji} \coloneqq \rot(n_j \times n_i, \angle(n_j, n_i)) (p_j - q_{ij}) + q_{ij}
+\end{equation*}
+$q_{ij}$ is the point that intersects the tangent planes of both $v_i$ and $v_j$, while also having minimum distance to both points. Since this approach is intrinsic, $q_{ij}$ simply becomes the midpoint of $v_i$ and $v_j$ (both of course rotated into the same plane).\bigskip
+
+Again, to minimize the smoothness energy, one must optimize the values for each $p_i$ and $t_{ij}$. The algorithm does this in a very similar fashion to the approach used in the optimization of the orientation field. Although this can be done intrinsically, because of the often undesired properties of intrinsic algorithms, the authors of \cite{jakob2015instant} focus on the extrinsic approach. As it is for the orientation field, the intrinsic and extrinsic approaches differ in that one does not rotate vectors into another plane, but rather leave it in three-dimensional space.
+
+\begin{figure}[htb!]
+	\begin{centering}
+		\includegraphics[width=8cm]{img/position-field-intrinsic-extrinsic.png}\par
+	\end{centering}
+	\caption{Optimizing the smoothness of the position field intrinsically \textit{(top)} and extrinsically \textit{(bottom)}. \cite{jakob2015instant}}
+	\label{fig:position-field-intrinsic-extrinsic}
+\end{figure}
+
+\paragraph{Extrinsic smoothness}
+When the smoothness energy is optimized extrinsically, we first must recalculate $q_{ij}$. In the intrinsic approach one could define it as the midway between two vertices. In the extrinsic approach, we still must minimize the distance to $v_i$ and $v_j$, however also maintain its position on both their respective tangent planes. This is a constrained least-squares problem, but has a simple solution though:
+\begin{equation*}
+\begin{split}
+	& q_{ij} \coloneqq \frac{1}{2}(v_i + v_j) - \frac{1}{4}(\lambda_i n_i + \lambda_j n_j),\\
+	& \lambda_i \coloneqq \frac{2 \langle (n_i + \langle n_i, n_j \rangle n_j, v_j - v_i \rangle)}{1 - \langle n_i, n_j \rangle 12 + \epsilon}
+\end{split}
+\end{equation*}
+where $\epsilon > 0$ is small real number ensuring a reasonable value for $n_i = n_j$ \cite{jakob2015instant}.\bigskip
+
+With this position in hand, one can now optimize the integer jumps $t_{ij}$ through brute-force search over a fairly minimal set:
+\begin{equation*}
+	(t_{ij}, t_{ji}) \coloneqq \argmin_{t' \in Q_{ij}, t'' \in Q_{ji}} \Vert \mathcal{T}_{s_p}(p_i, n_i, o_i, t') - \mathcal{T}_{s_p}(p_j, n_j, o_j, t'') \Vert
+\end{equation*}
+where sets $Q_{ij}$ and $Q_{ji}$ contain the $s_p$ nearest integer translations of $q_{ij}$ to $q_{ij}$ and $q_{ji}$ to $q_{ji}$ respectively \cite{jakob2015instant}.\bigskip
+
+Using this, we can now optimize each of the vertices representative position $p_i$ using the following iterative algorithm, similar to the orientation field optimization:
+\begin{equation*}
+\begin{split}
+	& p_i' \leftarrow w_{ij_1} \mathcal{T}_{s_p}(p_{j_1i}, n_i, o_i, t_{ij_1}), \qquad p_i \leftarrow \frac{p_i'}{\sum_{k=1}^1 w_{ij_k}} \\
+	& \textrm{recompute all } t_{ij}\\
+	& p_i' \leftarrow p_i' + w_{ij_2} \mathcal{T}_{s_p}(p_{j_2i}, n_i, o_i, t_{ij_2}), \qquad p_i \leftarrow \frac{p_i'}{\sum_{k=1}^2 w_{ij_k}} \\
+	& \textrm{recompute all } t_{ij}\\
+	& \dots
+\end{split}
+\end{equation*}
+where $j_1, j_2, \dots \in \mathcal{N}(i)$ \cite{jakob2015instant}.
+
+\begin{figure}[htb!]
+	\begin{centering}
+		\includegraphics[width=8cm]{img/position-field-illustration.png}\par
+	\end{centering}
+	\caption{Position fields after optimizing the smoothness energy intrinsically \textit{(left)} and extrinsically \textit{(right)}. \cite{jakob2015instant}}
+	\label{fig:position-field-illustration}
+\end{figure}
+
+\paragraph{Singularities.}
+Through this localized approach, singularities can also appear in position fields. Here they correlate to residual integer translations over a cycle, and are not defined if an orientation singularity is already present at that location. Similar to orientation field singularities, position singularities result in an irregular vertex. However, in quad-dominant meshes, they can also produce T-junctions instead of irregular vertices \cite{jakob2015instant}.
+
+% Multiresolution hierarchy
 \subsection{Multiresolution hierarchy}
-\begin{itemize}
-	\item	Problem of local minima
-	\item	Solution
-\end{itemize}
+\begin{figure}[htb!]
+	\begin{centering}
+		\includegraphics[width=\textwidth]{img/multiresolution-hierarchy.png}\par
+	\end{centering}
+	\caption{The iterations used in the orientation- and position-field optimizations can locally smooth their respective fields. However, they tend to get stuck in local minima. Multiresolution hierarchy is able to minimize this problem, resulting in smoother fields and fewer singularities. \cite{jakob2015instant}}
+	\label{fig:multireolution-hierarchy}
+\end{figure}
+
+A main drawback the iterations used in both orientation- and position-field optimization have, is that they can get stuck in local minima. This occurs when multiple nearby vertices have very similar properties, and the iteration looping over the graphs vertices visits these vertices right after one another. If then in the internal optimization iterations (such as algorithm \eqref{eq:orientation-intrinsic-vector}) those vertices are visited right in the beginning, it can, to a certain extent, fixate these properties. Visiting other edges without similar properties can then have little to no effect on them.  This creates artifacts in the respective fields, which do not follow the geometry's surface \cite{jakob2015instant}. \bigskip
+
+A really simple approach to tackle this is by creating a permutation of the vertices using \textbf{randomization} whenever visiting a vertex $i$.
+
+The authors however propose the use of \textbf{multiresolution hierarchy}. Briefly speaking, it collapses neighboring vertices into "super-vertices". A more precise scheme is:
+\begin{enumerate}
+	\item	Processing: assign a value $A_i = 1$ to each vertex $i \in \mathcal{V}$.
+	\item	Repeat, until no collapses are possible:
+			\begin{enumerate}
+				\item	For each edge $(i,j) \in \mathcal{E}$ assign a score:
+						\begin{equation*}
+							S_{ij} \coloneqq \langle n_i, n_j \rangle \cdot \min(\frac{A_i}{A_j}, \frac{A_j}{A_i})
+						\end{equation*}
+				\item	Iterate over $S_{ij}$ decreasingly and collapse vertices $i,j$ into the new vertex $v$, only if neither has been collapsed yet\\
+						The new vertex is assigned an area of $A_v = A_i + A_j$, its other properties are determined by the area-weighted areas of all the merged vertices in $v$.
+			\end{enumerate}
+\end{enumerate}
+The exact process is described in more detail by \cite{jakob2015instant}, which also takes inspiration from \cite{botsch2006primo}. This method can be reapplied multiple times (multiple depths), resulting in different results (figure \ref{fig:multireolution-hierarchy-depths}).
+
+\begin{figure}[htb!]
+	\begin{centering}
+		\includegraphics[width=8cm]{img/multiresolution-hierarchy-depths.png}\par
+	\end{centering}
+	\caption{An illustration of the position field after the application of multiresolution hierarchy at various depths. Notice how extreme depth values can result in lower quality results. \cite{jakob2015instant}}
+	\label{fig:multireolution-hierarchy-depths}
+\end{figure}
 
 % Exporting
 \subsection{Mesh extraction}
-\cite{jakob2015instant}
-\begin{itemize}
-	\item	Extraction
-	\item	(Editing?)
-\end{itemize}
+Now that we have optimized the orientation- and position-field, and thus also modified the input graph $\mathcal{G}$, one can finally export it as a mesh. To do so, the proposed algorithm takes an intermediate step and computes a new undirected graph $\mathcal{G}' = (\mathcal{V}', \mathcal{E}')$. Let $\mathcal{V}' = \{p_i \mid i \in \mathcal{V}\}$, and connect two vertices $(i,j)$, if $t_{ij}$ is unit vector-valued. These types of integer jumps are particularly interesting, since they state that $p_i$ and $p_j$ are just a single integer translation apart, approximating edges in the output mesh. Furthermore, Let $\mathcal{C} \coloneqq \{(i,j) \in \mathcal{E} \mid t_{ij} = - t_{ji}\}$. The edges in $\mathcal{C}$ have integer values, which reference the same point by integer translation \cite{jakob2015instant}.\bigskip
+
+We can now iterate over the edges $(i,j) \in \mathcal{C}$ in increasing order of the distance $\Vert p_i - p_j \Vert$ and add those edges to $\mathcal{E}$, if neither $i$ nor $j$ are already connected by an edge. Further filtering and optimization operations can be applied to $\mathcal{G}$, as described in \cite{jakob2015instant}.
+
+Finally, we can export $\mathcal{G}'$, which now contains position and adjacency information, as an output mesh. It only remains to detect faces in $\mathcal{G}'$, which can be done using a simple greedy algorithm. However, this approach is error-prune to harsh conditions, and can produce non-manifold outputs. To still produce manifold outputs, one can simply remove problematic vertices and edges from $\mathcal{G}'$. Note, that this will still produce artifacts in the output mesh \cite{jakob2015instant}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Results
@@ -206,7 +424,7 @@ FROM 3.1 COMPUTE SMOOTH FIELDS
 \section{Conclusion}
 \begin{itemize}
 	\item	Quite simple algorithm, but powerful
-	\item	Parts can be seperated and used individually (for example you can use the orientation field generation in other algorithms as well)
+	\item	Parts can be separated and used individually (for example you can use the orientation field generation in other algorithms as well)
 	\item	Problem of many singularities needs to be dealt with
 \end{itemize}
 

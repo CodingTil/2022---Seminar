@@ -1,1 +1,5 @@
 remeshing
+parameterizations
+Multiresolution
+Multiresoluion
+multiresolution
