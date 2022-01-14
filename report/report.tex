@@ -6,6 +6,7 @@
 % Own Packages
 \usepackage{amsmath}
 \usepackage{wrapfig}
+\usepackage{hyperref}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Own Definitions
@@ -95,16 +96,16 @@ When a tensor product structure is not needed, often \textbf{triangle meshes} ar
 A mesh is \textbf{uniform} when its faces are as "uniform" as possible. This means the faces are of the same size and of the same shape. Additionally, \textbf{isotropy} is an important property of meshes. A mesh is isotropic, when its faces are aligned in certain directions. So combined, an uniform and isotropic mesh consists of equilateral triangles in triangle meshes or squares in quad meshes \cite{alliez2003isotropic,surazhsky2003isotropic}. While modelling triangle meshes, it is not uncommon that the resulting meshes are very nonuniform and have many redundant faces. Algorithms performing on triangle meshes can heavily struggle under such conditions. Therefore, it is quite beneficial to simplify such meshes into uniform replicas while also minimizing face count, without losing the shape of the original geometry (figure \ref{fig:uniform-mesh}).
 
 
-\subsection{Global and local remeshing}
+\subsection{Global and local remeshing}\label{global-local-remeshing}
 As already stated, many meshes are created through automatic processes like 3D scanning, which do often result into low quality meshes. For many geometry processing algorithms these meshes are dissatisfactory and will result in performance and quality losses. So there is a need to reduce the complexity of these meshes, to improve their quality, and sometimes even transform them into an entirely different type of mesh. This process is called \textbf{remeshing} \cite{alliez2008recent}.\bigskip
 
 Although there are several central issues to all remeshing techniques, one especially complex one is to find the corresponding location of a new vertex on the input mesh. This is where all remeshing techniques are categorized into two classes: Global remeshing and local remeshing \cite{botsch2007geometric,alliez2008recent}.\bigskip
 
 \textbf{Global remeshing} tackles the correspondence problem through mesh parameterization. Mesh parameterization is the process of finding a parametric equation of the meshes surface. Since the input and output mesh should share the same surface, finding the corresponding location of a new vertex on the input mesh is quite uncomplicated, given that the parametric equation is known. Therein lies the main drawback with this global approach: Determining a parametric equation of a surface is a challenge, which can be quite computationally expensive and suffer from inaccuracy amongst other issues. However, if the input mesh was successfully parameterized, a high quality mesh can easily be produced \cite{jakob2015instant,alliez2008recent}.
 
-To sum up, global remeshing techniques suffer from efficiency and simplicity, however can yield high quality meshes. A few great approaches to this technique are the "Mixed-Integer Quadrangulation" algorithm by Bommes et al. and "Periodic Global Parameterization" by Alliez et al.\bigskip
+To sum up, global remeshing techniques suffer from efficiency and simplicity, however can yield high quality meshes. A few great approaches to this technique are the "Mixed-Integer Quadrangulation" algorithm by Bommes et al. (\cite{bommes2009mixed}) and "Periodic Global Parameterization" by Alliez et al (\cite{ray2006periodic}).\bigskip
 
-On the other hand there are \textbf{local remeshing} techniques. These algorithms do without global mesh parameterization and rather work directly on the surface itself. Also, instead of creating an entirely new output mesh, local remeshing algorithms locally modify the input mesh itself using topological operations, such as adding, relocating, and removing vertices. During these modifications, the vertices are always forced to rest on the surface or rather mesh. \textbf{2D 3D?!?!?!??! TODO !=!=!=!==!=!=}. This process is highly scalable, robust and simple. However, since the process is limited to only local information at a time, it is limited. Hence, local remeshing techniques usually tend to be of lower quality than global remeshing techniques, and also introduce mesh singularities due to its locality \cite{jakob2015instant,alliez2008recent}. \textbf{ANOTHER PAPER=!=!=!}
+On the other hand there are \textbf{local remeshing} techniques. These algorithms do without global mesh parameterization and rather work directly on the surface itself. Also, instead of creating an entirely new output mesh, local remeshing algorithms locally modify the input mesh itself using topological operations, such as adding, relocating, and removing vertices. During these modifications, the vertices are always forced to rest on the surface or rather mesh. This process is highly scalable, robust and simple. However, since the process is limited to only local information at a time, it can produce solutions that aren't globally optimal. Hence, local remeshing techniques usually tend to be of lower quality than global remeshing techniques, and also introduce mesh singularities due to its locality \cite{jakob2015instant,alliez2008recent}. In the later part of this paper, we will shortly present the approach by \cite{tarini2010practical}, and later on compare it to the Instant field-aligned meshes algorithm.
 
 
 \subsection{$N$-RoSy fields}\label{rosy}
@@ -129,9 +130,9 @@ As a side effect of imperfect symmetries $N$-RoSy fields introduce singularities
 
 \begin{figure}[htb!]
 	\begin{centering}
-		\includegraphics[width=5cm]{img/n-Rosy-Geometry.png} \includegraphics[width=5cm]{img/n-Rosy-Mesh.png}\par
+		\includegraphics[width=5cm]{img/n-Rosy-orientation.png} \includegraphics[width=5cm]{img/n-Rosy-Mesh.png}\par
 	\end{centering}
-	\caption{A $4$-RoSy field calculated from a meshes surface \textit{(left)}. Note how singularities in the $4$-RoSy field as the singularity above the eye can introduce singularities in the quad-dominant output mesh \textit{(right)}.}
+	\caption{A $4$-RoSy orientation field calculated from a meshes surface \textit{(left)}. Note how singularities in the $4$-RoSy field (marked as colored dots), e.g. the singularity on the front right of the head, can introduce singularities in the quad-dominant output mesh \textit{(right)}, i.e. irregular vertices.}
 	\label{fig:n-rosy-geometry}
 \end{figure}
 
@@ -140,18 +141,32 @@ As a side effect of imperfect symmetries $N$-RoSy fields introduce singularities
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Related Work
 \section{Related Work}\label{related_work}
-\begin{itemize}
-	\item	Previous remeshing approaches from \cite{jakob2015instant}: \cite{ray2006periodic,bommes2009mixed} (since they are also very similar)
-	\item	\cite{marcias2015data} to compare to the data driven approach in the seminar
-	\item	Focus on type of remeshing (for example local or global, triangle or quad based)
-\end{itemize}
+The field of meshing surfaces is an ever advancing topic. Both techniques of global and local meshing are researched extensively in the past decades. More recently, since the rise of artificial intelligence, new data-driven approaches take on this challenging problem. Since there are many respectable studies in this field, we focus our review on one approach of each technique, all of which produce quad-meshes. For a complete survey we refer the reader to \cite{bommes2013quad}.
+
+\subsection*{Mixed-Integer Quadrangulation.}\label{MIQ}
+Mixed-Integer Quadrangulation (\textit{MIQ}) by \cite{bommes2009mixed} is a global method to remeshing given triangle meshes into quad-meshes. The goal of this method is to create a global mesh parameterization (section \ref{global-local-remeshing}) which can then be used to extract a quad mesh.\bigskip
+
+Similarly to the Instant Field-Aligned Meshes approach, MIQ first creates an orientation field on the mesh. This is done by assigning a direction to each triangle face, and then aligning them in right angles by smoothening, since the resulting mesh is intended to be a quad mesh. Creating such a smooth cross field is mathematically challenging. The authors propose to formulate this problem as a mixed-integer optimization problem, which then can be solved using a mixed-integer programming solver. Afterwards this smooth cross field can be used to cut the triangle mesh and unfold it into a 2D plane, giving way for a global mesh parameterization. Finally, using this global parameterization, a quad mesh laying on top of the 2D plane can be extracted and can then lifted back into 3D \cite{bommes2009mixed,schmidt2014towards}.
+
+\subsection*{Practical quad mesh simplification.}\label{PQMS}
+Practical quad mesh simplification (\textit{PQMS}) by \cite{tarini2010practical} is a local method to produce low complexity triangle or quad meshes starting from high complexity ones. It follows the goal to maximize the tessellation quality globally, i.e. the amount of irregular vertex valencies. Note, that mesh simplification is a related yet different topic to remeshing. Mesh simplification does not necessarily try to improve the overall quality of the mesh, it however aims to reduce the complexity, which remeshing algorithms do not fundamentally pursue.\bigskip
+
+PQMS operates based on a preconditioned observation: An ideal, zero-complexity quad mesh is composed entirely of flat, equally sided, regular, uniform squares. Such a mesh has the property that all edges are of same length $l$, and all diagonals of each face of length $l \sqrt{2}$ \cite{tarini2010practical}.
+
+The authors can approximate such a mesh by using local rule-based optimization operations on adjacent quad faces. The local smoothening operations include vertex/edge rotations and edge/diagonal collapses. For each group of faces these operations are prioritized by their contribution to the mesh's complexity improvement.
+
+\subsection*{Data-Driven Interactive Quadrangulation.}\label{DDIQ}
+A fairly new approach to the meshing problem is machine learning. The Data-Driven Interactive Quadrangulation method (\textit{DDIQ}) by \cite{marcias2015data} can interactively quadrangulate user-sketched patches in geometries. Similarly to previous approaches DDIQ also follows a pattern-based quadrangulation model: Given a patch on the surface, i.e. a part that has yet to be meshed, it fills in a quad mesh based on some pattern. This pattern is adaptable to the boundary constraints of the patch, i.e. the edges of the surrounding mesh \cite{marcias2015data}.
+
+Contrarily to previous work, DDIQ does not rely on only a few predefined patterns: This approach can automatically analyze patterns in already existing quad meshes, which of course then can be used to create new ones. This allows for learning a great database of patterns, created with data from numerous manually designed meshes by artists. Fitting patterns can then be selected based on user-defined topological and geometric criteria. As a result, the quality of the filled in patches tends to increase with the amount of patterns analyzed.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Main Sections
 \section{Method}\label{algorithm}
 The following described Instant Field-Aligned Meshes algorithm is a very simple to implement local remeshing approach.
 
-Fundamentally, it takes a graph representation of the geometry's surface as an input and outputs either a triangle-based or a quad-dominant isotropic mesh. To create this mesh, the algorithm computes 2 $N$-RoSy fields (section \ref{rosy}) based on the input graph called orientation- and position-field respectively. In order to align the mesh globally with a direction field, the orientation- and position-field are then optimized iteratively through local smoothing operations - either intrinsically or extrinsically. The output mesh can then be extracted from both fields \cite{jakob2015instant}.
+Fundamentally, it takes a graph representation of the geometry's surface as an input and outputs either a triangle-based or a quad-dominant isotropic mesh. To create this mesh, the algorithm computes 2 fields based on the input graph called orientation- and position-field respectively, of which the first one is a $N$-RoSy field (section \ref{rosy}). In order to align the mesh globally with a direction field, the orientation- and position-field are then optimized iteratively through local smoothing operations - either intrinsically or extrinsically. The output mesh can then be extracted from both fields \cite{jakob2015instant}.
 
 % Input
 \subsection{Input representation}
@@ -414,10 +429,37 @@ Finally, we can export $\mathcal{G}'$, which now contains position and adjacency
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Results
 \section{Results and Discussion}
+The simplicity and locality of operations in the Instant Field-Aligned Meshes method result in incredible scalability, efficiency, and robustness compared to global approaches.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Outlook
-%\section{Outlook}
+\begin{figure}[htb!]
+	\begin{centering}
+		\includegraphics[width=12cm]{img/computation-time.png}\par
+	\end{centering}
+	\caption{Running time comparison against several global methods for a progressive input mesh. \cite{jakob2015instant}}
+	\label{fig:computation-time}
+\end{figure}
+
+Current global meshing approaches yield computation times of significant superlinear growth with increasing mesh size. In the case of MIQ (section \ref{MIQ}), this is mostly due to the more complex mixed-integer problem that comes with more vertices, i.e. more and larger constraints to the problem. Solving these increased programming problems of course takes more time \cite{jakob2015instant,bommes2009mixed}.
+
+Similarly to other local meshing methods like PQMS (section \ref{PQMS}), IFAM also operates in linear time. This allows for great scalability, i.e. 3D models of incredible size can be easily quadrangulated (see figure \ref{fig:computation-time}). In addition, this method can be implemented parallel, further benefiting from larger input sizes \cite{jakob2015instant}.\bigskip
+
+This great advantage in computation time does, however, come at the cost of quality. Figure \ref{fig:quality} illustrates the quality differences between the global approach MIQ, the local approach PQMS, and IFAM:
+
+\begin{figure}[htb!]
+	\begin{centering}
+		\includegraphics[width=8cm]{img/quality.png}\par
+	\end{centering}
+	\caption{Quadrilateral meshing comparison: MIQ \cite{bommes2009mixed} (\textit{top left}), PQMS \cite{tarini2010practical} (\textit{bottom left}), IFAM (\textit{right}). \cite{jakob2015instant}}
+	\label{fig:quality}
+\end{figure}
+
+In the bottom row of the figure you can see how, by making use of alignment information, the Instant Field-Aligned Meshes approach naturally snaps to shape feature, while also obtaining higher isotropy and regularity \cite{jakob2015instant}.
+
+Compared to global approaches, IFAM lacks quality. Due to its locality, IFAM tends to create more singularities than global algorithms such as MIQ. From this comes the main point of criticism: IFAM by itself creates lots of singularities and singularity pairs in unexpected and unintended locations that simply wouldn't occur in global methods. This is a problem that has yet to be dealt with. Perhaps "messy" areas in both orientation and position field could be excluded from the output mesh, and then be filled in by pattern based patch filling such as DDIQ (section \ref{DDIQ}) as an optional post-processing step to minimize those singularity occurrences.
+
+Furthermore, from the top row of figure \ref{fig:quality} one can see, that IFAM computes are more uniform output mesh that the global method MIQ \cite{jakob2015instant}.\bigskip
+
+Finally, local remeshing approaches are more robust to non-manifold input meshes than global methods: Even if just some vertices are non-manifold, global meshes often fail to execute and compute an output mesh. On the other hand, due to the locality of IFAM, the algorithm is often unaware of the existence of non-manifold vertices in the input and can skip those non-manifold vertices, thus creating an output mesh with the affected areas cut out.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Conclusion

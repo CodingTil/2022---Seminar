@@ -3,3 +3,5 @@ parameterizations
 Multiresolution
 Multiresoluion
 multiresolution
+Quadrangulation
+quadrangulate
