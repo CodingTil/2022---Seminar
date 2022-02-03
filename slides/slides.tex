@@ -20,12 +20,11 @@
 
 % ====================
 % Title
-\title[The Perfect Krabby Patty] % (optional short title, used for the footer)
-{The Perfect Krabby Patty and How to Make It}
+\title{Instant Field Aligned Meshes}
 
 % ====================
 % Author
-\author{Spongebob Squarepants}
+\author{Til Mohr}
 \institute[Visual Computing Group]
 {
     Computer Graphics and Multimedia \\
@@ -48,89 +47,118 @@
 % ====================
 % Start document
 \begin{document}
-  \rwthTitlepagePictureLarge{img/arch.jpg} % banner image 2/3 of slide size
-  % alternative title pages:
-  % \rwthTitlepagePicture{img/arch.jpg} % banner image 1/3 of slide size
-  % \rwthTitlepageColor % blue background 1/3 of slide size
+\rwthTitlepagePictureLarge{img/title.png} % banner image 2/3 of slide size
+% alternative title pages:
+%\rwthTitlepagePicture{img/title.png} % banner image 1/3 of slide size
+% \rwthTitlepageColor % blue background 1/3 of slide size
 
-  \begin{frame}
-    \frametitle{Example Slide}
-    \framesubtitle{... with some blindtext.}
+\begin{frame}
+\frametitle{Remeshing?}
+\begin{columns}
+\begin{column}{0.45\textwidth}
+	\includegraphics[width=\textwidth]{img/input.png}
+\end{column}
+\begin{column}{0.45\textwidth}
+	\includegraphics[width=\textwidth]{img/output-pure.png}
+\end{column}
+\end{columns}
+\end{frame}
 
-    Example text goes here.
+\begin{frame}
+	\frametitle{Triangle Meshes}
+\end{frame}
 
-    \begin{itemize}
-      \item some
-      \item bullet
-      \item points
-    \end{itemize}
-    
-    And a formula. Why not?
-    \[ \min_{\mathbf{Q}} \sum_i \left\| \mathbf{A}_i \mathbf{Q} - \mathbf{P}_i(\mathbf{A}_i \mathbf{Q}) \right\|^2_\mathrm{F} \]
-  \end{frame}
-  
-  \begin{frame}
-    \frametitle{Multicolumn Layouts}
-    
-    \begin{columns}
-      \begin{column}{0.45\textwidth}
-        One column on the left with a picture (yum):
-        
-        \includegraphics[width=\textwidth]{img/krabby-patty}
-      \end{column}
-      \begin{column}{0.45\textwidth}
-        Another column on the right.
-        
-        \vspace*{1.0em} % extra vertical space
-        
-        Let's also have a table:
-        
-        \vspace*{1.0em} % extra vertical space
-        
-        \begin{tabular}{cc|c}
-          $a$ & $b$ & $a \land b$ \\ \hline
-          F   & F   & F \\
-          F   & T   & F \\
-          T   & F   & F \\
-          T   & T   & T
-        \end{tabular}
-        
-        \vspace*{1.0em} % extra vertical space
-        
-        More fascinating text with \textbf{\color{rwth-blue}important} information.
-      \end{column}
-    \end{columns}
-  \end{frame}
+\begin{frame}
+	\frametitle{Quad Meshes}
+\end{frame}
 
-  \begin{frame}
-    \frametitle{Animations}
-    
-    Guide the viewers' attention by revealing contents \pause piece \pause by \pause piece.
-    
-    \vspace*{1.0em}
-    \pause
-    
-    Also works for
-    \begin{itemize}
-      \item enumerations
-      \pause
-      \item and many other things
-    \end{itemize}
-  \end{frame}
-  
-  \begin{frame}
-    \frametitle{Animations, Pt.\ 2}
-    
-    Use animations to develop figures and formulas, e.\,g.:
-    
-    \includegraphics<1>[width=\textwidth]{img/checks-1}%
-    \includegraphics<2>[width=\textwidth]{img/checks-2}%
-    \includegraphics<3>[width=\textwidth]{img/checks-3}%
-    \includegraphics<4->[width=\textwidth]{img/checks-4}%
-    
-    \visible<5->{\[
-      \mathbf{\hat Q}^{k+1} = \mathbf{Q}(\alpha^*)
-      \visible<6->{+ \beta \tilde F(\mathbf{Q}(\alpha^*))}
-    \]}
-  \end{frame}
+\begin{frame}
+	\frametitle{Quad-dominant Meshes}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Uniformity \& Isotropy}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Remeshing}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Global Remeshing}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Local Remeshing}
+\end{frame}
+
+\begin{frame}
+	\frametitle{$N$-RoSy Fields}
+\end{frame}
+
+% METHOD
+
+\begin{frame}
+	\frametitle{Method}
+	\begin{enumerate}
+		\item	Transform input into a graph
+		\item	Calculate the orientation field
+		\item	Calculate the position field
+		\item	Export the mesh
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Input Representation}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Orientation Field}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Orientation Field}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Orientation Field}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Position Field}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Position Field}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Position Field}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Multiresolution Hierarchy}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Mesh Extraction}
+\end{frame}
+
+% Comparison
+\begin{frame}
+	\frametitle{Comparison}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Comparison}
+\end{frame}
+
+% References
+\begin{frame}[allowframebreaks]
+	\frametitle{References}
+	\nocite{*}
+	\bibliographystyle{amsalpha}
+	\bibliography{references}
+\end{frame}
+
 \end{document}

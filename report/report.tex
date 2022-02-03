@@ -42,7 +42,7 @@
 % Abstract
 
 \begin{abstract}
-Remeshing geometries into uniform models is an essential preceding task to many geometry processing algorithms. This paper will examine the Instant Field-Aligned Meshes algorithm presented by Jakob et al. Here, we first present all the key concepts used in the algorithm, and then explain how the authors combine these concepts to form their remeshing algorithm. This approach is characterized by using locally optimized orientation- and position-fields to compute an isotropic triangular or quadrilateral mesh that is globally aligned to a directional field. Since it accomplishes goals from global remeshing using local optimizations, the method is quite simple in terms of design and can produce high-quality meshes in a very short time. To compare to this approach, this paper will also take a closer look at other meshing algorithms and will analyze the performance and quality differences in the resulting meshes.
+Remeshing 3D shapes into uniform tessellations is an essential preceding task to many geometry processing algorithms. This paper will examine the Instant Field-Aligned Meshes algorithm presented by Jakob et al. Here, we first present all the key concepts used in the algorithm, and then explain how the authors combine these concepts to form their remeshing algorithm. This approach is characterized by using locally optimized orientation- and position-fields to compute an isotropic triangular or quadrilateral mesh that is globally aligned to a directional field. Since it accomplishes goals from global remeshing using local optimizations, the method is quite simple in terms of design and can produce high-quality meshes in a very short time. To compare to this approach, this paper will also take a closer look at other meshing algorithms and will analyze the performance and quality differences in the resulting meshes.
 \end{abstract}
 
 \keywords{remeshing, triangulation, quadrangulation}
@@ -53,15 +53,15 @@ Remeshing geometries into uniform models is an essential preceding task to many 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Introduction
 \section{Introduction}
-In computer graphics, a mesh represents the surface of a geometry and can be created by digital artists or by scanning real-world objects. Currently, they are irreplaceable in countless fields, from CAD applications to video games. Many algorithms that work with meshes prefer or even require input meshes that meet certain criteria, such as quality and level of detail, to achieve the best results. For this reason, it is often necessary to convert existing meshes into replicas of the same surface that meet some specific criteria. This conversion process is called remeshing.\bigskip
+In computer graphics, a mesh represents the surface of a geometry and can be created by digital artists or by scanning real-world objects. Currently, they are irreplaceable in countless fields, from CAD applications to video games. Many algorithms that work with meshes prefer or even require input meshes that meet certain criteria, such as quality and regularity, to achieve the best results. For this reason, it is often necessary to convert existing meshes into replicas of the same surface that meet some specific criteria. This conversion process is called remeshing.\bigskip
 
-Previous remeshing algorithms are able to compute meshes that largely satisfy the specified criteria, but they tend to be overly complex in construction, require specialized solvers, and have low time complexity relative to the size of the input mesh. Instant Field-Aligned Meshes (\textit{IFAM}) is a new approach to remeshing that is fundamentally different from, but also inspired by, previous approaches. This new algorithm can achieve comparable results to previous algorithms while drastically reducing runtime complexity and also having a much simpler structure \cite{jakob2015instant}.\bigskip
+Previous remeshing algorithms are able to compute meshes that largely satisfy the specified criteria, but they tend to be overly complex in construction, require specialized solvers, and have high time complexity relative to the size of the input mesh. Instant Field-Aligned Meshes (\textit{IFAM}) is a new approach to remeshing that is fundamentally different from, but also inspired by, previous approaches. This new algorithm can achieve comparable results to previous algorithms while drastically reducing runtime complexity and also having a much simpler structure \cite{jakob2015instant}.\bigskip
 
-In the following, we will first clarify the background knowledge and thus explain the remeshing problem in more detail. We then briefly introduce other remeshing algorithms before explaining how IFAM works. Finally, this paper analyzes this approach and compares it to previous methods.
+In the following, we will first clarify the background knowledge and thus explain the remeshing problem in more detail (Section~\ref{background}). We then briefly introduce other remeshing algorithms (Section~\ref{related_work}) before explaining how IFAM works (Section~\ref{algorithm}). Finally, this paper analyzes this approach and compares it to previous methods (Section~\ref{results}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Background
-\section{Background and Terminology}
+\section{Background and Terminology}\label{background}
 To fully understand how the algorithm works, one first needs to understand some key concepts and techniques. This also helps to distinguish this approach from other meshing algorithms.
 
 \subsection{Polygonal meshes}
@@ -71,47 +71,49 @@ A polygonal mesh is a set of polygonal surfaces, each representing a 2D surface 
 
 \textbf{Quad meshes} are meshes, where each cell is a quadrilateral. They have a tensor product structure that is advantageous for many applications such as spline fitting. Since quad meshes have this mathematical advantage, many algorithms are better suited for quad meshes than for triangular meshes. Therefore, they play an important role in computer graphics and geometry processing \cite{bommes2013quad, chen2019quadrilateral}.\bigskip
 
-Although the quality of a quad mesh is not specifically defined, depending on the application, there are some signs of a high-quality quad mesh, such as flat and square surfaces and vertices of valency 4. However, creating a high-quality pure quad mesh is a rather difficult task. When the surface of the geometry has boundaries and curvatures that the mesh consisting of square surfaces must satisfy, singularities are inevitable. A singularity in a mesh is a vertex with irregular valence, where a regular valence in a quad mesh is of course 4 \cite{fogg2017simple,fogg2018singularities}.
+Although the quality of a quad mesh is not specifically defined, depending on the application, there are some signs of a high-quality quad mesh, such as flat and square surfaces and vertices of valence 4. However, creating a high-quality pure quad mesh is a rather difficult task. When the surface of the geometry has boundaries and curvatures that the mesh consisting of square surfaces must satisfy, singularities are inevitable. A singularity in a mesh is a vertex with irregular valence, where a regular valence in a quad mesh is of course 4 \cite{fogg2017simple,fogg2018singularities}.
 
 \begin{figure}[htb!]
 	\begin{centering}
 		\includegraphics[width=9cm]{img/Singularities.png}\par
 	\end{centering}
-	\caption{Singularities create pentagons or triangles in quad-dominant mesh \textit{(left)}. Can be transformed into a pure-quad mesh through a subdivision step \textit(right). \cite{jakob2015instant}}
+	\caption{Singularities create pentagons or triangles in quad-dominant mesh \textit{(left)}. Can be transformed into a pure-quad mesh through a subdivision step \textit{(right)}. \cite{jakob2015instant}}
 	\label{fig:singularities}
 \end{figure}
 
 Since creating pure quad meshes is a difficult task, meshing algorithms oftentimes resort to quad-dominant meshes. \textbf{Quad-dominant meshes} are meshes, where the majority of faces are quadrilaterals and some are triangles or pentagons. Note however, that a quad-dominant mesh can be converted into a pure-quad mesh through a Catmull-Clark subdivision step (\cite{catmull1978recursively}) \cite{jakob2015instant}.\bigskip
 
-When a tensor product structure is not needed, \textbf{triangle meshes} are often used because they have a smaller number of vertices in comparison to quad meshes, resulting in simplified geometric calculations. In addition, triangle-dominant meshes can be easily and efficiently converted into meshes of pure triangular faces, which are of course always flat. Because of these advantages, modeling a triangle mesh from data or even scratch can be much easier than modeling quad meshes. For example, most 3D scans produce triangle meshes, although often very non-uniform ones.\bigskip
+When a tensor product structure is not needed, \textbf{triangle meshes} are often used because they have a smaller number of vertices per face in comparison to quad meshes, resulting in simplified geometric calculations. In addition, triangle-dominant meshes can be easily and efficiently converted into meshes of pure triangular faces, which are of course always flat. Because of these advantages, modeling a triangle mesh from data or even scratch can be much easier than modeling quad meshes. For example, most 3D scans produce triangle meshes, although often very non-uniform ones.\bigskip
 
 \begin{figure}[htb!]
 	\begin{centering}
 		\includegraphics[width=9cm]{img/Uniform-Mesh.png}\par
 	\end{centering}
-	\caption{Nonuniform mesh \textit{(left)} and its uniform counterpart after uniform remeshing \textit{(right)} \cite{alliez2008recent}.}
+	\caption{Nonuniform mesh \textit{(left)} and its uniform counterpart after uniform remeshing \textit{(right)}. \cite{alliez2008recent}}
 	\label{fig:uniform-mesh}
 \end{figure}
 
-A mesh is \textbf{uniform} if its faces are as "uniform" as possible. This means the faces are of the same size and shape. If a mesh is very non-uniform it is considered to be of higher complexity than a uniform replica. \textbf{Isotropy} is also an important property of meshes. A mesh is isotropic if its faces are oriented in specific directions. Thus, a uniform and isotropic mesh consists of equilateral triangles in triangle meshes or squares in quad meshes \cite{alliez2003isotropic,surazhsky2003isotropic}.
+A mesh is \textbf{uniform} if its faces are as "uniform" as possible. This means the faces are of the same size. If a mesh is very non-uniform it is considered to be of higher complexity than a uniform replica. \textbf{Isotropy} is a property that describes uniformity in all directions. Thus, a uniform and isotropic mesh consists of equilateral triangles in triangle meshes or squares in quad meshes \cite{alliez2003isotropic,surazhsky2003isotropic}.
 
-When modeling triangle meshes, it is not uncommon for the resulting meshes are very non-uniform and have many redundant faces. Algorithms operating on triangle meshes may have great difficulty under such conditions. Therefore, it is of great advantage to simplify such meshes into uniform replicas and minimize the number of faces without losing the shape of the original geometry (figure \ref{fig:uniform-mesh}) \cite{jakob2015instant}.
+When modeling triangle meshes, it is not uncommon for the resulting meshes to be very non-uniform and have many redundant faces. Algorithms operating on triangle meshes may have great difficulty under such conditions. Therefore, it is of great advantage to simplify such meshes into uniform replicas and minimize the number of faces without losing the shape of the original geometry (Figure~\ref{fig:uniform-mesh}) \cite{jakob2015instant}.
 
 
 \subsection{Global and local remeshing}\label{global-local-remeshing}
 As mentioned earlier, many meshes are created using automated methods such as 3D scanning, which often results in poor quality meshes. For many geometry processing algorithms, these meshes are unsatisfactory and lead to performance and quality losses. Therefore, there is a need to reduce the complexity of these meshes, improve their quality, and sometimes even transform them into a completely different type of mesh. This process is referred to as \textbf{remeshing} \cite{alliez2008recent}.\bigskip
 
-Although there are several central problems with all remeshing methods, one particularly complex problem is finding the appropriate location of a new vertex on the input mesh. At this point, all remeshing methods are divided into two classes: Global remeshing and local remeshing \cite{botsch2007geometric,alliez2008recent}.\bigskip
+Although there are several central problems with all remeshing methods, one particularly complex problem is finding the appropriate location of a new vertex in the output mesh on the input mesh. To deal with this, there are generally speaking two approaches: Either create an entirely new mesh for an output, or modify the input mesh to create the output mesh. Here, all remeshing methods are divided into two classes: Global remeshing and local remeshing \cite{botsch2007geometric,alliez2008recent}.\bigskip
 
-In \textbf{Global remeshing}, the correspondence problem is solved by mesh parameterization. In mesh parameterization, a parametric equation is found for the surface of the mesh. Since the input and output meshes should represent the same surface, it is quite easy to find the corresponding position of a new vertex on the input mesh, provided that the parametric equation is known. Herein lies the major drawback of this global approach: determining the parametric equation of a surface is a challenge that can be, among other things, very computationally intensive and inaccurate. However, once the input mesh is successfully parameterized, a high-quality mesh can be generated quite easily \cite{jakob2015instant,alliez2008recent}.
+\textbf{Global remeshing} solves the correspondence problem by creating a completely new mesh through parameterization of the input mesh. In mesh parameterization, a parametric equation is found for the surface of the mesh. Since the input and output meshes should represent the same surface, it is quite easy to find the corresponding position of a new vertex on the input mesh, provided that the parametric equation is known. Herein lies the major drawback of this global approach: determining the parametric equation of a surface is a challenge that can be, among other things, very computationally intensive and inaccurate. However, once the input mesh is successfully parameterized, a new high-quality mesh can be generated quite easily \cite{jakob2015instant,alliez2008recent}.
 
 In summary, global remeshing techniques suffer from high time complexity and complex design, but can still provide high quality meshes. Some good approaches to this technique are the "Mixed-Integer Quadrangulation" algorithm by Bommes et al. (\cite{bommes2009mixed}) and "Periodic Global Parameterization" by Alliez et al (\cite{ray2006periodic}).\bigskip
 
-On the other hand, there are \textbf{local remeshing} methods. These algorithms dispense with global mesh parameterization and instead work directly on the surface itself. Instead of creating a completely new initial mesh, local remeshing algorithms locally modify the input mesh itself by performing topological operations such as adding, moving, and removing vertices. These modifications always place the vertices on the surface or mesh, solving the correspondence problem. This process is highly scalable, robust, and simple. However, since the process is limited to local information around each vertex, it can lead to solutions that are not globally optimal. Therefore, local meshing processes are generally of lower quality than global meshing processes and also lead to mesh singularities due to their locality \cite{jakob2015instant,alliez2008recent}. The following parts of the paper briefly introduce the approach of \cite{tarini2010practical} and then compares it with the Instant Field-Aligned Meshes algorithm for field-aligned meshes.
+On the other hand, there are \textbf{local remeshing} methods. These algorithms dispense with global mesh parameterization and instead work by modifying the initial mesh connectivity. Instead of creating a completely new initial mesh, local remeshing algorithms locally modify the input mesh itself by performing topological operations such as adding, moving, and removing vertices. By modifying the input mesh, the original surface is at least partially preserved in the output mesh, solving the correspondence problem. This process is highly scalable, robust, and simple. However, since the process is limited to local information around each vertex, it can lead to solutions that are not globally optimal. Therefore, local meshing processes are generally of lower quality than global meshing processes and also lead to mesh singularities due to their locality \cite{jakob2015instant,alliez2008recent}. The following parts of the paper briefly introduce the approach of \cite{tarini2010practical} and then compares it with the Instant Field-Aligned Meshes algorithm for field-aligned meshes.
 
 
 \subsection{$N$-RoSy fields}\label{rosy}
-In geometry, an $N$-way rotational symmetry is a property a shape has if it is invariant under rotations of a multiple of $\frac{2\pi}{N}$ about a point or an axis in 2D or 3D, respectively \cite{palacios2007rotational}. These symmetries can be thought of as vector fields, with $N$ vectors associated with each point, each pointing in a direction where the symmetry repeats (figure \ref{fig:n-rosy-singularities}). Hence, these symmetries are called $N$-way rotational symmetry fields (\textbf{$N$-RoSy fields}) \cite{panozzo2012fields}.
+The following described $N$-RoSy fields play an important role in many approaches to meshing surfaces, both global and local ones. In IFAM, $N$-RoSy fields are used to guide the orientation of edges in the output mesh \cite{jakob2015instant}.
+
+In geometry, an $N$-way rotational symmetry is a property a shape has if it is invariant under rotations of a multiple of $\frac{2\pi}{N}$ about a point or an axis in 2D or 3D, respectively \cite{palacios2007rotational}. These symmetries can be thought of as vector fields, with $N$ vectors associated with each point, each pointing in a direction where the symmetry repeats (Figure~\ref{fig:n-rosy-singularities}). Hence, these symmetries are called $N$-way rotational symmetry fields (\textbf{$N$-RoSy fields}) \cite{panozzo2012fields}.
 
 \begin{figure}[htb!]
 	\begin{centering}
@@ -121,14 +123,14 @@ In geometry, an $N$-way rotational symmetry is a property a shape has if it is i
 	\label{fig:n-rosy-singularities}
 \end{figure}
 
-Symmetries also occur on geometrical surfaces, where they are often defined as isometric automorphism. Symmetries can be categorized into two classes:
+Symmetries also occur on geometrical surfaces, where they are often defined as isometric automorphisms. This means, a surface can be mapped to itself while preserving all of its structure, i.e. distances and orientations. Symmetries can be categorized into two classes:
 \begin{itemize}
 	\item	\textbf{Intrinsic} symmetries preserve geodesic distances.
 	\item	\textbf{Extrinsic} symmetries preserve euclidean distances.
 \end{itemize}
 In practice, though, geometries rarely have perfect symmetries on their entire surface. On most surfaces there are only local symmetries, and even they are not always ideal. Thus, deviations must be tolerated \cite{panozzo2012fields}.\bigskip
 
-As a side effect of imperfect symmetries, $N$-RoSy fields introduce singularities. Note that these singularities can differ from singularities introduced in meshes. A singularity in an $N$-RoSy field is a point in the vector field where the associated vector is equal to 0 (figure \ref{fig:n-rosy-singularities}) \cite{palacios2007rotational}. In short, they occur when the surface curves in a way that break the directions of the $N$-RoSy field. However, because of this property, they are also the points that control the topology of the field and thus the layout of the extracted mesh (figure \ref{fig:n-rosy-geometry}). Automatic generation of $N$-RoSy fields with optimal number and position of singularities remains a major challenge. Methods attempting this generally cannot operate without introducing new singularities that then appear as artifacts, such as irregular faces or vertices, on the extracted meshes \cite{lai2009metric}.
+As a side effect of imperfect symmetries, $N$-RoSy fields introduce singularities. Note that these singularities can differ from singularities introduced in meshes. A singularity in an $N$-RoSy field is a point in the vector field where the associated vector is undefined (Figure~\ref{fig:n-rosy-singularities}) \cite{palacios2007rotational}. In short, they occur when the surface curves in a way that break the directions of the $N$-RoSy field. However, because of this property, they are also the points that control the topology of the field and thus the layout of the extracted mesh (Figure~\ref{fig:n-rosy-geometry}). Automatic generation of $N$-RoSy fields with optimal number and position of singularities remains a major challenge. Methods attempting this generally cannot operate without introducing new singularities that then appear as artifacts, such as irregular faces or vertices, on the extracted meshes \cite{lai2009metric}.
 
 \begin{figure}[htb!]
 	\begin{centering}
@@ -146,16 +148,16 @@ As a side effect of imperfect symmetries, $N$-RoSy fields introduce singularitie
 The field of meshing surfaces is an ever advancing topic. Both global and local meshing methods are extensively researched in the past decades. More recently, since the advent of artificial intelligence, new data-driven approaches take on this challenging problem. Since there are many respectable studies in this area, this paper focuses its review on one approach from each technique, all of which generate quad-meshes. For a complete survey, the reader is referred to \cite{bommes2013quad}.
 
 \subsection*{Mixed-Integer Quadrangulation.}\label{MIQ}
-Mixed-Integer Quadrangulation (\textit{MIQ}) by \cite{bommes2009mixed} is a global method for remeshing given triangle meshes into quad-meshes. The goal of this method is to create a global mesh parameterization (section \ref{global-local-remeshing}), which can then be used to extract a quad mesh.\bigskip
+Mixed-Integer Quadrangulation (\textit{MIQ}) by \cite{bommes2009mixed} is a global method for remeshing given triangle meshes into quad-meshes. The goal of this method is to create a global mesh parameterization (Section~\ref{global-local-remeshing}), which can then be used to extract a quad mesh.\bigskip
 
-Similar to the Instant Field-Aligned Meshes approach, MIQ first creates an orientation field on the mesh. This is done by assigning a direction to each triangle face and then aligning them by smoothening at right angles, since the resulting mesh should be a quad mesh. Creating such a smooth cross field is mathematically challenging. The authors suggest formulating this problem as a mixed-integer optimization problem, which then can be solved using a mixed-integer programming solver. Afterward, this smooth cross field can be used to cut the triangle mesh and unfold it into a 2D plane, allowing for a global mesh parameterization. Finally, this global parameterization can be used to extract a quad mesh that lies on top of the 2D plane, which can then lift back into 3D \cite{bommes2009mixed,schmidt2014towards}.
+Similar to the Instant Field-Aligned Meshes approach, MIQ first creates an orientation field on the mesh. This is done by assigning a direction to each triangle face and then aligning them at 90 degree angles, since the resulting mesh should be a quad mesh, and finally smoothing out the field. Creating such a smooth cross field is mathematically challenging. The authors suggest formulating this problem as a mixed-integer optimization problem, which then can be solved using a mixed-integer programming solver. Afterward, this smooth cross field can be used to cut the triangle mesh and unfold it into a 2D plane, allowing for a global mesh parameterization. Finally, this global parameterization can be used to extract a quad mesh that lies on top of the 2D plane, which can then lift back into 3D \cite{bommes2009mixed,schmidt2014towards}.
 
 \subsection*{Practical quad mesh simplification.}\label{PQMS}
 Practical quad mesh simplification (\textit{PQMS}) by \cite{tarini2010practical} is a local method to generating quad meshes with low complexity, starting from high-complexity ones. Its goal is to globally maximize the tessellation quality, i.e. to reduce the number of irregular vertex valencies. Note that mesh simplification is a related, but still different topic to remeshing. Mesh simplification is not necessarily about improving the overall quality of the mesh, but about reducing the complexity, which is fundamentally not the case for remeshing algorithms.\bigskip
 
-PQMS operates based on a preconditioned observation: An ideal quad mesh with  zero complexity consists entirely of flat, equilateral, regular, uniform squares. Such a mesh has the property that all edges have the same length $l$, and all diagonals of each face are of length $l \sqrt{2}$ \cite{tarini2010practical}.
+PQMS operates based on crucial observation: An ideal quad mesh with  zero complexity consists entirely of flat, equilateral, regular, uniform squares. Such a mesh has the property that all edges have the same length $l$, and all diagonals of each face are of length $l \sqrt{2}$ \cite{tarini2010practical}.
 
-The authors can approximate such a mesh by local rule-based optimization operations on adjacent quad faces. Local smoothening operations include rotations of vertices/edges and collapsing of edges/diagonals. For each set of neighboring faces, these operations are prioritized according to their contribution to improving the tessellation quality of the mesh \cite{tarini2010practical}.
+The authors can approximate such a mesh by local rule-based optimization operations on adjacent quad faces. Local smoothing operations include rotations of vertices/edges and collapsing of edges/diagonals. For each set of neighboring faces, these operations are prioritized according to their contribution to improving the tessellation quality of the mesh \cite{tarini2010practical}.
 
 \subsection*{Data-Driven Interactive Quadrangulation.}\label{DDIQ}
 A fairly new approach to the meshing problem is machine learning. The Data-Driven Interactive Quadrangulation method (\textit{DDIQ}) by \cite{marcias2015data} can interactively quadrangulate user-sketched patches in geometries. Similar to previous approaches, DDIQ also follows a pattern-based quadrangulation model: Starting from a patch on the surface, i.e. a part not yet meshed, a quad mesh is filled in based on a certain pattern. This pattern is adaptable to the boundary constraints of the patch, i.e. the edges of the surrounding mesh. The pattern can be selected from a database of possible patterns based on how well it quadrangulates the patch \cite{marcias2015data}.
@@ -168,7 +170,7 @@ Unlike previous work, DDIQ does not rely on only a few predefined patterns: This
 \section{Method}\label{algorithm}
 A new local remeshing approach is the Instant Field-Aligned Meshes algorithm (\textit{IFAM}). The pipeline described below is very simple to implement and time efficient.
 
-Basically, it takes a graph representation of the geometry's surface as an input and outputs either a triangle-based or a quad-dominant isotropic mesh. To create this mesh, the algorithm computes two fields based on the input graph, the orientation- and position-field, respectively, of which the first one is an $N$-RoSy field (section \ref{rosy}). To globally align the mesh with a direction field, the orientation- and position-field are then iteratively optimized through local smoothing operations, either intrinsic or extrinsic. The output mesh can then be extracted from both fields \cite{jakob2015instant}.
+Basically, it takes a graph representation of the geometry's surface as an input and outputs either a triangle-based or a quad-dominant isotropic mesh. To create this mesh, the algorithm computes two fields based on the input graph, the orientation- and position-field, respectively, of which the first one is an $N$-RoSy field (Section~\ref{rosy}). To globally align the mesh with a direction field, the orientation- and position-field are then iteratively optimized through local smoothing operations, either intrinsic or extrinsic. The output mesh can then be extracted from both fields \cite{jakob2015instant}.
 
 % Input
 \subsection{Input representation}
@@ -177,13 +179,13 @@ As mentioned before, the algorithm takes as input the surface of the geometry re
 	\item	For meshes, $\mathcal{E}$ is equal to the usual set of edges in the mesh.
 	\item	For point clouds, $(i,j) \in \mathcal{E}$ if the vertex $i$ is in the set of $K$-nearest neighbors by distance of $j$.
 \end{itemize}
-The neighborhood of a vertex $i$ is denoted by $\mathcal{N}(i) = \{j \in \mathcal{V} \mid (i,j) \in \mathcal{E}\}$. Additionally, weights $w_{ij}$ can be assigned to each edge $(i,j) \in \mathcal{E}$. These weights effect the subsequent smoothing of the orientation- and position-field and can be chosen geometry-dependent or uniform (equal to $1$). They will be used in the following optimization pipelines \cite{jakob2015instant}.\bigskip
+The neighborhood of a vertex $i$ is denoted by $\mathcal{N}(i) = \{j \in \mathcal{V} \mid (i,j) \in \mathcal{E}\}$. Additionally, weights $w_{ij}$ can be assigned to each edge $(i,j) \in \mathcal{E}$. These weights affect the subsequent smoothing of the orientation- and position-field and can be chosen geometry-dependent or uniform (equal to $1$). They will be used in the following optimization pipelines \cite{jakob2015instant}.\bigskip
 
 This simple input representation allows the use of many geometry representations in this algorithm, as long as one can convert them into the described graph input format.
 
 % Fields
 \subsection{Fields}
-Based on the input graph, the algorithm now computes an $N$-RoSy field parameter-free. This field, which is called the \textbf{orientation field}, represents a set of directions on the input geometry along which the edges of the output mesh should align. To compute this step, the algorithm locally optimizes the smoothness energy of the field, which will be defined in the following, using integer rotations to either respect geodesic distances (\textbf{intrinsic}) or to automatically snap to the edges of the geometry (\textbf{extrinsic}). Afterward, this orientation field is used to calculate a positional symmetry field (PoSy field, or \textbf{position field}). Using integer translations, a parameterization is calculated locally for each vertex, and its gradient is set to be aligned to the orientation field. Then, the algorithm also minimizes this fields smoothness energy, again either intrinsic or extrinsic \cite{jakob2015instant}.\bigskip
+Based on the input graph, the algorithm now computes an $N$-RoSy field parameter-free. This field, which is called the \textbf{orientation field}, represents a set of directions on the input geometry along which the edges of the output mesh should align. To compute this step, the algorithm locally optimizes a smoothness energy of the field, which will be defined in the following, to either respect geodesic distances (\textbf{intrinsic}) or to automatically snap to the edges of the geometry (\textbf{extrinsic}). Afterward, this orientation field is used to calculate a positional symmetry field (PoSy field, or \textbf{position field}). Using integer translations, a parameterization is calculated locally for each vertex, and its gradient is set to be aligned to the orientation field. Then, the algorithm also minimizes this fields smoothness energy, again either intrinsic or extrinsic \cite{jakob2015instant}.\bigskip
 
 Only few user-defined parameters are required for the following mechanisms:
 \begin{itemize}
@@ -193,22 +195,22 @@ Only few user-defined parameters are required for the following mechanisms:
 \end{itemize}
 
 \subsubsection{Orientation field}\label{orientation-field}
-The first step of the algorithm computes an $s_o$-RoSy field (section \ref{rosy}), which is called the \textbf{orientation field}. This field is used to align the edges in the output mesh.\bigskip
+The first step of the algorithm computes an $s_o$-RoSy field (Section~\ref{rosy}), which is called the \textbf{orientation field}. This field is used to align the edges in the output mesh.\bigskip
 
 Briefly, to compute this orientation field, one needs to determine all integer rotations of the vertices/edges in our input graph $\mathcal{G}$ and then smooth the neighboring directions in the resulting field. This process, which will be described in detail in the following sections, is heavily inspired by the works of \cite{bommes2009mixed,ray2008n}, however works completely locally and is thus much simpler in design, while still giving comparable results \cite{jakob2015instant}.
-
-\paragraph{Symmetry group.}
-Depending on its type, in the (isotropic) output mesh, each vertex has 3 or 4 directions, which the edges face in. They will be aligned by this orientation field, which is calculated only using the input graph $\mathcal{G}$. For that, the algorithm first needs to assign to each $i \in \mathcal{V}$ a \textit{representative} direction $o_i \in \mathbb{R}^3$. The initial value of $o_i$ does not affect in the final result, as it is used to create integer rotations around the normal direction $n_i$ of vector $i$ and will be optimized.\bigskip
 
 \begin{wrapfigure}{r}{3cm}
 	\includegraphics[width=3cm]{img/integer-rotation.png}\par
 	\label{fig:integer-rotation}
 \end{wrapfigure}
 
+\paragraph{Symmetry group.}
+Depending on its type, in the (isotropic) output mesh, each vertex has 3 or 4 directions, which the edges face in. They will be aligned by this orientation field, which is calculated only using the input graph $\mathcal{G}$. For that, the algorithm first needs to assign to each $i \in \mathcal{V}$ a \textit{representative} direction $o_i \in \mathbb{R}^3$. The initial value of $o_i$ does only minimally affect the final result, as it is used to create integer rotations around the normal direction $n_i$ of vector $i$ and will be optimized.\bigskip
+
 The authors denote the rotation matrix by angle $\theta$ about vector $n$ as $\rot(n, \theta)$. Now, an integer rotation of a representative vector $o$ about a fixed normal $n$ can be expressed as $\mathcal{R}_{s_o}(o,n,k)$, and the set of all integer rotations of $o$ about $n$ as $\mathcal{R}_{s_o}(o,n)$:
 \begin{equation*}
 \begin{split}
-	& \mathcal{R}_{s_o}(o,n,k) \coloneqq \rot(n, k \cdot \frac{2\pi}{s_o})o, \quad k \in \mathbb{Z} \\
+	& \mathcal{R}_{s_o}(o,n,k) \coloneqq \rot \left(n, k \cdot \frac{2\pi}{s_o} \right) o, \quad k \in \mathbb{Z} \\
 	& \mathcal{R}_{s_o}(o,n) \coloneqq \{\mathcal{R}_{s_o}(o,n,0), \dots, \mathcal{R}_{s_o}(o,n,s_o-1)\}
 \end{split}
 \end{equation*}
@@ -216,16 +218,16 @@ Thus, before any optimization is done, the orientation field consists of all the
 
 \begin{figure}[htb!]
 	\begin{centering}
-		\includegraphics[width=8cm]{img/orientation-field-intrinsic-extrinsic.png}\par
+		\includegraphics[width=\textwidth]{img/orientation-field-intrinsic-extrinsic-horizontal.png}\par
 	\end{centering}
-	\caption{Optimizing the smoothness of the orientation $s_o$-RoSy field intrinsically \textit{(top)} and extrinsically \textit{(bottom)}. \cite{jakob2015instant}}
+	\caption{Optimizing the smoothness of the orientation $s_o$-RoSy field intrinsically \textit{(left)} and extrinsically \textit{(right)}. \cite{jakob2015instant}}
 	\label{fig:orientation-field-intrinsic-extrinsic}
 \end{figure}
 
 \paragraph{Intrinsic smoothness.}
-As mentioned earlier, the authors based their methods on the work of \cite{ray2008n,bommes2009mixed}. Here, they propose to minimize the smoothness energy of an $N$-RoSy field by smoothening out the angular difference between adjacent vectors. For this, vectors are being folded into a common plane (figure \ref{fig:orientation-field-intrinsic-extrinsic}, top), which preserves the intrinsic properties of the surface while also making the angular differences easier to compute \cite{jakob2015instant}.\bigskip
+As mentioned earlier, the authors based their methods on the work of \cite{ray2008n,bommes2009mixed}. Here, they propose to minimize the smoothness energy of an $N$-RoSy field by smoothening out the angular difference between adjacent vectors. For this, vectors are being folded into a common plane (Figure~\ref{fig:orientation-field-intrinsic-extrinsic}, top), which preserves the intrinsic properties of the surface while also making the angular differences easier to compute \cite{jakob2015instant}.\bigskip
 
-Since each vertex has $s_o$ representative direction vectors, the authors encode this inconvenience through integer variables $k_{ij} \in \mathbb{Z}$ for each edge $(i,j) \in \mathcal{E}$ and store them in a vector $k \in \mathbb{Z}^{2 \vert \mathcal{E} \vert}$.
+Since each vertex has $s_o$ representative direction vectors, the authors encode this matching through integer variables $k_{ij} \in \mathbb{Z}$ for each edge $(i,j) \in \mathcal{E}$ and store them in a vector $k \in \mathbb{Z}^{2 \vert \mathcal{E} \vert}$.
 
 The smoothness energy of the entire $s_o$-RoSy field $O$ can now be calculated as:
 \begin{equation}\label{eq:orientation-isotropic-energy}
@@ -248,7 +250,7 @@ In this way, the algorithm can already find improved values for $\mathcal{R}_{s_
 Furthermore, the representative direction vector $o_i$ can be optimized, i.e. rotated, by:
 \begin{equation}\label{eq:orientation-intrinsic-vector}
 \begin{split}
-	& o_i \leftarrow \sum_{j \in \mathbb{N}(i)} w_{ij} \cdot \mathbb{R}_{s_o}(o_{ji}, n_i, j_{ij})\\
+	& o_i \leftarrow \sum_{j \in \mathbb{N}(i)} w_{ij} \cdot \mathcal{R}_{s_o}(o_{ji}, n_i, j_{ij})\\
 	& o_i \leftarrow \frac{o_i}{\Vert o_i \Vert}
 \end{split}
 \end{equation}
@@ -267,12 +269,12 @@ However, the authors have found that this process can be significantly improved 
 where $j_1, j_2, \dots \in \mathcal{N}(i)$.
 
 \paragraph{Extrinsic smoothness.}
-This intrinsic calculation has a disadvantage: Two vectors are always folded into a common plane. While this is efficient, it often loses desirable information about the curvature of the geometry. This behavior is illustrated in figure \ref{fig:orientation-field-illustration}. The authors' proposed alternative, which is also parameter-free, can naturally align with edges in the geometry. They achieve this by not folding two vectors into a common plane, but rather leaving them in embedded space \cite{jakob2015instant}.\bigskip
+This intrinsic calculation has a disadvantage: Two vectors are always folded into a common plane. While this is efficient, it often loses desirable information about the curvature of the geometry. This behavior is illustrated in Figure~\ref{fig:orientation-field-illustration}. The authors' proposed alternative, which is also parameter-free, can naturally align with edges in the geometry. They achieve this by not folding two vectors into a common plane, but rather leaving them in embedded space \cite{jakob2015instant}.\bigskip
 
 To do so, we must apply some modifications to the previous formulas:
 The extrinsic smoothness formula is now:
 \begin{equation}\label{eq:orientation-extrinsic-energy}
-	E_e(O,k) \coloneqq \sum_{i \in \mathcal{V}} \sum_{j \in \mathcal{N}(i)} \angle(\mathcal{R}_{s_o}(o_{i}, n_i, k_{ij}, \mathcal{R}_{s_o}(o_{ji}, n_j, k_{ji}))^2,
+	E_e(O,k) \coloneqq \sum_{i \in \mathcal{V}} \sum_{j \in \mathcal{N}(i)} \angle(\mathcal{R}_{s_o}(o_{i}, n_i, k_{ij}), \mathcal{R}_{s_o}(o_{ji}, n_j, k_{ji}))^2,
 \end{equation}
 The brute force search from equation \eqref{eq:orientation-intrinsic-integer} now changes to the following:
 \begin{equation}\label{eq:orientation-extrinsic-integer}
@@ -289,7 +291,7 @@ Finally, we can also adapt the algorithm to optimize $o_i$ and its iterative imp
 \end{figure}
 
 \paragraph{Singularities.}
-Since the orientation field is an $N$-RoSy field, singularities can naturally occur (section \ref{rosy}). The singularities in an orientation field do affect the orientation of points in that specific location, but in the output mesh only correspond to irregular vertices \cite{jakob2015instant}.
+Since the orientation field is an $N$-RoSy field, singularities can naturally occur (Section~\ref{rosy}). The singularities in an orientation field do affect the orientation of points in that specific location, but in the output mesh only correspond to irregular vertices \cite{jakob2015instant}.
 
 \subsubsection{Position field}
 Now that the algorithm has created and optimized the $s_o$-RoSy orientation field $O$, it can move on to the next step, which is computing the \textbf{position field}. By design, this field is perfectly aligned with the orientation field and will specify the location of vertices on the output mesh \cite{jakob2015instant}.\bigskip
@@ -304,17 +306,17 @@ This algorithm addresses the same problem again through a local solution: It com
 \end{wrapfigure}
 
 \paragraph{Symmetry group.}
-The authors propose a simple yet efficient encoding for the local parameterization of a vertex $i$: The parameterization's gradient is set to be exactly aligned with the orientation field $o_i$ (section \ref{orientation-field}).
+The authors propose a simple yet efficient encoding for the local parameterization of a vertex $i$: The parameterization's gradient is set to be exactly aligned with the orientation field $o_i$ (Section~\ref{orientation-field}).
 
-Since the gradient is fixated by $o_i$, one can then encode the local parameterization of vertex $i$ in a point $p_i \in \mathbb{R}^3$. \cite{jakob2015instant} proposes this point $p_i$ to be the closest lattice point to $v_i$.
+Since the gradient is fixed by $o_i$, one can then encode the local parameterization of vertex $i$ in a point $p_i \in \mathbb{R}^3$. \cite{jakob2015instant} proposes this point $p_i$ to be the closest lattice point to $v_i$.
 
-Let $s_p = m \cdot s_o, m \in \mathbb{N}$. The local parameterization is, of course, invariant under rotations by integer multiples of $\frac{2\pi}{s_p}$ (section \ref{rosy}). But more importantly, it is invariant under integer translations of $\rho$ along the $s_p$ symmetry axes \cite{jakob2015instant}.\bigskip
+Let $s_p = m \cdot s_o, m \in \mathbb{N}$. The local parameterization is, of course, invariant under rotations by integer multiples of $\frac{2\pi}{s_p}$ (Section~\ref{rosy}). But more importantly, it is invariant under integer translations of $\rho$ along the $s_p$ symmetry axes \cite{jakob2015instant}.\bigskip
 
 Let $s_p$ be even. Integer translations of a position $p \in \mathbb{R}^3$ about $\rho$ and the set of all its possible integer translations are defined as:
 \begin{equation*}
 \begin{split}
 	& \mathcal{T}_{s_p}(p,n,o,t) \coloneqq p + \rho \cdot \sum_{k=0}^{\frac{s_p}{2}-1} t_k \mathcal{R}_{s_p}(o,n,k)\\
-	& \mathcal{T}_{s_p}(p,n,o) \coloneqq \{\mathcal{T}_{s_p}(p,n,o,t) \mid t \in \mathbb{Z}^{\frac{s_p}{2}}\}.
+	& \mathcal{T}_{s_p}(p,n,o) \coloneqq \left\{\mathcal{T}_{s_p}(p,n,o,t) \mid t \in \mathbb{Z}^{\frac{s_p}{2}}\right\}.
 \end{split}
 \end{equation*}
 Since $s_p$ is even, the sum over $\frac{s_p}{2}$ terms ensures that each orientation- (or rather translation-) axis is considered once. Each integer $t_k$ then translates $p$ by $\rho$ units in the respective axis.
@@ -326,7 +328,7 @@ Similar to the orientation field, we again introduce new integer variables due t
 
 The intrinsic smoothness energy of the position field $P$ can now be measured as:
 \begin{equation*}
-	E_i(P,t) \coloneqq \sum_{i \in \mathcal{V}} \sum_{j \in \mathcal{N}(i)} \Vert p_i - \mathcal{T}_{s_p}(p_{ji}, n_i, o_i, t_{ij})^2_2
+	E_i(P,t) \coloneqq \sum_{i \in \mathcal{V}} \sum_{j \in \mathcal{N}(i)} \Vert p_i - \mathcal{T}_{s_p}(p_{ji}, n_i, o_i, t_{ij}) \Vert ^2_2
 \end{equation*}
 $p_{ji}$ represents $p_j$ of vertex $j$ after being rotated into the tangent plane of $v_i$. It is defined as follows:
 \begin{equation*}
@@ -338,9 +340,9 @@ Again, to minimize the smoothness energy, one must optimize the values for each 
 
 \begin{figure}[htb!]
 	\begin{centering}
-		\includegraphics[width=8cm]{img/position-field-intrinsic-extrinsic.png}\par
+		\includegraphics[width=\textwidth]{img/position-field-intrinsic-extrinsic-horizontal.png}\par
 	\end{centering}
-	\caption{Optimizing the smoothness of the position field intrinsically \textit{(top)} and extrinsically \textit{(bottom)}. \cite{jakob2015instant}}
+	\caption{Optimizing the smoothness of the position field intrinsically \textit{(left)} and extrinsically \textit{(right)}. \cite{jakob2015instant}}
 	\label{fig:position-field-intrinsic-extrinsic}
 \end{figure}
 
@@ -393,24 +395,24 @@ With this localized approach, singularities can also occur in position fields. H
 	\label{fig:multireolution-hierarchy}
 \end{figure}
 
-The main drawback of the iterations used in both orientation- and position-field optimization is that they can get stuck in local minima. This happens when multiple nearby vertices have very similar properties and the iteration looping over the graphs vertices visits these vertices right after one another. Then, if in the internal optimization iterations (e.g. algorithm \eqref{eq:orientation-intrinsic-vector}) those vertices are visited in the beginning and right one another, it can, to a certain extent, fixate these properties. Visiting other edges without similar properties afterward can then have little to no effect on those properties. Properties stuck in local minima create artifacts in the respective fields that do not follow the geometry's surface \cite{jakob2015instant}.\bigskip
+The main drawback of the iterations used in both orientation- and position-field optimization is that they can get stuck in local minima. This happens when multiple nearby vertices have very similar properties and the iteration looping over the graphs vertices visits these vertices right after one another. Then, if in the internal optimization iterations (e.g. algorithm \eqref{eq:orientation-intrinsic-vector}) those vertices are visited in the beginning and right after one another, it can, to a certain extent, fix these properties. Visiting other edges without similar properties afterward can then have little to no effect on those properties. Properties stuck in local minima create artifacts in the respective fields that do not follow the geometry's surface \cite{jakob2015instant}.\bigskip
 
 A really simple approach to this problem is to generate a random permutation of the vertices every time a vertex $i$ is visited.
 
-The authors however propose the use of an optional preprocessing step called \textbf{multiresolution hierarchy}. In short, it collapses neighboring vertices into "super-vertices". A more detailed scheme is:
+The authors however propose the use of an optional preprocessing step called \textbf{multiresolution hierarchy}. In short, it repeatedly collapses neighboring vertices into "super-vertices". A more detailed scheme is:
 \begin{enumerate}
 	\item	Processing: assign a value $A_i = 1$ to each vertex $i \in \mathcal{V}$.
 	\item	Repeat, until no collapses are possible:
 			\begin{enumerate}
 				\item	For each edge $(i,j) \in \mathcal{E}$ assign a score:
 						\begin{equation*}
-							S_{ij} \coloneqq \langle n_i, n_j \rangle \cdot \min(\frac{A_i}{A_j}, \frac{A_j}{A_i})
+							S_{ij} \coloneqq \langle n_i, n_j \rangle \cdot \min\left(\frac{A_i}{A_j}, \frac{A_j}{A_i}\right)
 						\end{equation*}
 				\item	Iterate over $S_{ij}$ decreasingly and collapse vertices $i,j$ into the new vertex $v$, only if neither has been collapsed yet.\\
 						The new vertex is assigned an area of $A_v = A_i + A_j$, its other properties are determined by the area-weighted areas of all the merged vertices in $v$.
 			\end{enumerate}
 \end{enumerate}
-The exact process is described in more detail by \cite{jakob2015instant}, which also takes inspiration from \cite{botsch2006primo}. This method can be reapplied multiple times (multiple depths), resulting in different results (figure \ref{fig:multireolution-hierarchy-depths}).
+The exact process is described in more detail by \cite{jakob2015instant}, which also takes inspiration from \cite{botsch2006primo}. This method can be reapplied multiple times (multiple depths), resulting in different results (Figure~\ref{fig:multireolution-hierarchy-depths}).
 
 \begin{figure}[htb!]
 	\begin{centering}
@@ -426,11 +428,11 @@ After the algorithm has created and optimized the orientation- and position-fiel
 
 We can now iterate over the edges $(i,j) \in \mathcal{C}$ in ascending order of the distance $\Vert p_i - p_j \Vert$ and add those edges to $\mathcal{E}$ if neither $i$ nor $j$ are already connected by an edge. This filtering process is beneficial to the quality of the output mesh since it avoids collapsing vertices too eagerly near orientation- and position-field singularities. Further filtering and optimization operations can be applied, as described in \cite{jakob2015instant}.\bigskip
 
-Finally, the output mesh can be extracted from $\mathcal{G}'$, which now contains position and adjacency information. All that remains is to detect faces in $\mathcal{G}'$, which can be done using a simple greedy algorithm. However, this approach is error-prune to harsh conditions, and can produce non-manifold outputs. To still produce manifold outputs, one can simply remove problematic vertices and edges from $\mathcal{G}'$. Note, that this will still produce local artifacts in the output mesh restricted to the regions of the original non-manifold sub-meshes \cite{jakob2015instant}.
+Finally, the output mesh can be extracted from $\mathcal{G}'$, which now contains position and adjacency information. All that remains is to detect faces in $\mathcal{G}'$, which can be done using a simple greedy algorithm. However, this approach is error-prone to harsh conditions, and can produce non-manifold outputs. To still produce manifold outputs, one can simply remove problematic vertices and edges from $\mathcal{G}'$. Note that this will still produce local artifacts in the output mesh restricted to the regions of the original non-manifold sub-meshes \cite{jakob2015instant}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Results
-\section{Results and Discussion}
+\section{Results and Discussion}\ref{results}
 The simplicity and locality of operations in the Instant Field-Aligned Meshes method lead to incredible scalability, efficiency, and robustness compared to global approaches.
 
 \begin{figure}[htb!]
@@ -441,11 +443,11 @@ The simplicity and locality of operations in the Instant Field-Aligned Meshes me
 	\label{fig:computation-time}
 \end{figure}
 
-Current global meshing approaches yield computation times of significant superlinear growth with respect to increasing mesh sizes. In the case of MIQ (section \ref{MIQ}), this is mainly due to the then more complex mixed-integer problem that comes with more vertices, i.e. more and larger constraints to the problem. Solving these larger programming problems naturally requires more time \cite{jakob2015instant,bommes2009mixed}.
+Current global meshing approaches yield computation times of significant superlinear growth with respect to increasing mesh sizes. In the case of MIQ (Section~\ref{MIQ}), this is mainly due to the then more complex mixed-integer problem that comes with more vertices, i.e. more and larger constraints to the problem. Solving these larger optimization problems naturally requires more time \cite{jakob2015instant,bommes2009mixed}.
 
-Similar to other local meshing methods like PQMS (section \ref{PQMS}), IFAM also operates in linear time. This allows for great scalability, i.e. 3D models of incredible size can be easily quadrangulated (see figure \ref{fig:computation-time}). In addition, this method can be implemented in parallel, further benefiting from larger input sizes \cite{jakob2015instant}.\bigskip
+Similar to other local meshing methods like PQMS (Section~\ref{PQMS}), IFAM also operates in linear time. This allows for great scalability, i.e. 3D models of incredible size can be easily quadrangulated (see Figure~\ref{fig:computation-time}). In addition, this method can be implemented in parallel, further benefiting from larger input sizes \cite{jakob2015instant}.\bigskip
 
-This large advantage in computation time does, however, come at the cost of quality. Figure \ref{fig:quality} illustrates the quality differences between the global approach MIQ, the local approach PQMS, and IFAM:
+This large advantage in computation time does, however, come at the cost of quality. Figure~\ref{fig:quality} illustrates the quality differences between the global approach MIQ, the local approach PQMS, and IFAM:
 
 \begin{figure}[htb!]
 	\begin{centering}
@@ -455,11 +457,11 @@ This large advantage in computation time does, however, come at the cost of qual
 	\label{fig:quality}
 \end{figure}
 
-The bottom row of the figure shows how, by making use of alignment information, the Instant Field-Aligned Meshes approach naturally snaps to shape feature, while also obtaining higher isotropy and regularity \cite{jakob2015instant}.
+The bottom row of the Figure shows how, by making use of alignment information, the Instant Field-Aligned Meshes approach naturally snaps to shape feature, while also obtaining higher isotropy and regularity \cite{jakob2015instant}.
 
-Compared to global approaches, IFAM lacks quality. Due to its locality, IFAM tends to create more singularities than global algorithms such as MIQ. From this comes the main point of criticism: IFAM by itself creates many singularities and singularity pairs in unexpected and unintended locations that simply would not appear in global methods. This is a problem that has yet to be dealt with. Perhaps "messy" regions in both orientation and position field, i.e. regions with high distortion, could be excluded from the output mesh, and then the resulting patches could be filled in by pattern-based patch filling such as DDIQ (section \ref{DDIQ}) as an optional post-processing step to minimize the occurrence of these singularity occurrences.
+Compared to global approaches, IFAM lacks quality. Due to its locality, IFAM tends to create more singularities than global algorithms such as MIQ. From this comes the main point of criticism: IFAM by itself creates many singularities and singularity pairs in unexpected and unintended locations that simply would not appear in global methods. This is a problem that has yet to be dealt with. Perhaps "messy" regions in both orientation and position field, i.e. regions with high distortion, could be excluded from the output mesh, and then the resulting patches could be filled in by pattern-based patch filling such as DDIQ (Section~\ref{DDIQ}) as an optional post-processing step to minimize the occurrence of these singularity occurrences. However, as a side note, both IFAM and MIQ offer manual editing mechanisms to deal with these issues, making them both more useful for practical applications.
 
-However, it is also evident from the top row of figure \ref{fig:quality} that IFAM computes are more uniform output mesh that the global method MIQ \cite{jakob2015instant}.\bigskip
+However, it is also evident from the top row of Figure~\ref{fig:quality} that IFAM computes are more uniform output mesh that the global method MIQ \cite{jakob2015instant}.\bigskip
 
 Finally, local remeshing approaches are more robust to non-manifold input meshes than global methods: Even if just some regions of the mesh are non-manifold, global meshes often fail to execute and compute an output mesh. On the other hand, due to the locality of IFAM, the algorithm is mostly unaware of the existence of non-manifold regions in the input and can skip the respective vertices, thus creating an output mesh with the affected areas cut out.
 
