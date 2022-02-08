@@ -1,12 +1,12 @@
 # Fdb version 3
-["bibtex slides"] 1644352242 "slides.aux" "slides.bbl" "slides" 1644352253
+["bibtex slides"] 1644358187 "slides.aux" "slides.bbl" "slides" 1644358281
   "C:/Users/Til Mohr/AppData/Local/Programs/MiKTeX/bibtex/bst/amscls/amsalpha.bst" 1591020010 28675 71ba1b1ee8387ac88670b0ea0eb2399a ""
   "references.bib" 1644010628 7415 58511813e655e720d12a66de400de91e ""
-  "slides.aux" 1644352252 7593 5ede319942735daae1512881e5dcfe91 "pdflatex"
+  "slides.aux" 1644358280 7335 cfb07136e2b7ed7ab94b06421878606a "pdflatex"
   (generated)
   "slides.bbl"
   "slides.blg"
-["pdflatex"] 1644352243 "slides.tex" "slides.pdf" "slides" 1644352253
+["pdflatex"] 1644358272 "slides.tex" "slides.pdf" "slides" 1644358281
   "C:/Users/Til Mohr/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1644324871 270765 0df932898c2112f5d9f771b7f61c5ad2 ""
   "C:/Users/Til Mohr/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/ectt1095.pk" 1644007790 21972 be3047ac59874b435c58f71c1796a0df ""
   "C:/Users/Til Mohr/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1643207704 9771425 ec3b57cd2d7481b7ab03c670fd8dfe61 ""
@@ -284,11 +284,11 @@
   "img/quality.png" 1642198562 1650597 f42f8cfe1159affbe724c428a90e0722 ""
   "img/title.png" 1643664780 1648106 ae379d2c4dc8946e35b8892097c37745 ""
   "img/triangles.png" 1644010817 162106 5878b95ee54a463323842a31395dde70 ""
-  "slides.aux" 1644352252 7593 5ede319942735daae1512881e5dcfe91 "pdflatex"
-  "slides.bbl" 1644352243 5923 7f8f258560d08ea15250ef7b4f36b3d0 "bibtex slides"
-  "slides.nav" 1644352252 3446 9c1cb7e14dfe1652e154c886bd8a02bb "pdflatex"
-  "slides.out" 1644352246 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "slides.tex" 1644352232 13501 86b7df3a10b21a219405b1a09d7b9986 ""
+  "slides.aux" 1644358280 7335 cfb07136e2b7ed7ab94b06421878606a "pdflatex"
+  "slides.bbl" 1644358187 5923 7f8f258560d08ea15250ef7b4f36b3d0 "bibtex slides"
+  "slides.nav" 1644358280 3260 791067d9635f4d0fea21efac8bef741e "pdflatex"
+  "slides.out" 1644358275 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "slides.tex" 1644358271 13879 999f3f4a84155ef9f8a778f8a88074bb ""
   (generated)
   "slides.aux"
   "slides.log"

@@ -44,7 +44,7 @@
 
 % ====================
 % Date
-\date{\today}
+\date{February 9, 2022}
 
 % ====================
 % Subject
@@ -122,13 +122,26 @@
 	\pause
 	\centering
 	~\\
-	\begin{tabular}{c|c}
-		\textbf{Global Remeshing} & \textbf{Local Remeshing} \\
-		\hline
-		Create new output mesh & Modify input mesh
-	\end{tabular}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\textbf{Global Remeshing:}\\
+			Create a new output mesh\\
+			~\\
+			{\color{mygreen} $\Rightarrow$ High quality meshes and globally optimal}\\
+			{\color{red} $\Rightarrow$ High time and design complexity}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\textbf{Local Remeshing:}\\
+			Modify the input mesh connectivity\\
+			~\\
+			{\color{red} $\Rightarrow$ Lower quality meshes and not globally optimal}\\
+			{\color{mygreen} $\Rightarrow$ Low time and design complexity}
+			\\~\\
+		\end{column}
+	\end{columns}
 \end{frame}
 
+\iffalse
 \begin{frame}
 	\frametitle{Global Remeshing}
 	\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Mesh Parameterization]
@@ -156,6 +169,7 @@
 	Easy to compute and parallelize \\
 	{\color{mygreen} $\Rightarrow$ Low time and design complexity}
 \end{frame}
+\fi
 
 \iffalse
 \begin{frame}
@@ -274,7 +288,7 @@
 	~\\
 	\begin{columns}
 		\begin{column}{0.7\textwidth}
-			Let $o_i \in \mathbb{R}^3$ be a directional representation vector for each $i \in \mathcal{V}$.\\
+			Let $o_i \in \mathbb{R}^3$ be a representational direction vector for each $i \in \mathcal{V}$.\\
 
 			\pause
 			\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Symmetry Group - Integer Rotations]
@@ -382,7 +396,7 @@
 	\frametitle{Position Field}
 	Position field $P$ consists of local parameterizations $\mathcal{T}_{s_o}(p_i,n_i,o_i)$ for every $i \in \mathcal{V}$\\
 	$\Rightarrow$ Smooth out the position field\\
-	$\Rightarrow$ Minimize differences between local parameterizations of adjacent vertices\\
+	$\Rightarrow$ Minimize distances between local parameterizations of adjacent vertices\\
 	\pause
 	~\\
 	Let $t_{ij} \in \mathbb{Z}^{\frac{s_o}{2}}$ for each $(i,j) \in \mathcal{E}$.\\
@@ -446,8 +460,7 @@
 		\item	Connect $(p_i, p_j)$ if $t_{ij}$ is unit vector-valued\\
 				$\Rightarrow$ $p_i$ and $p_j$ are just apart by $\rho$
 		\pause
-		\item	In ascending distance $\Vert p_i - p_j \Vert$:\\
-				Connect $(p_i, p_j)$ if $t_{ij} = -t_{ji}$
+		\item	Additional filtering to add edges
 	\end{enumerate}
 	\pause
 	~\\
