@@ -13,6 +13,16 @@
 \usepackage{etoolbox}
 \usepackage{adjustbox}
 
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{algorithm2e}
+\usepackage{tcolorbox}
+
+\colorlet{mygreen}{green!50!black}
+
+\DeclareMathOperator{\rot}{rot}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
 % ====================
 
 % Apply i8 styling
@@ -53,104 +63,418 @@
 % \rwthTitlepageColor % blue background 1/3 of slide size
 
 \begin{frame}
-\frametitle{Remeshing?}
-\begin{columns}
-\begin{column}{0.45\textwidth}
-	\includegraphics[width=\textwidth]{img/input.png}
-\end{column}
-\begin{column}{0.45\textwidth}
-	\includegraphics[width=\textwidth]{img/output-pure.png}
-\end{column}
-\end{columns}
+	\frametitle{Remeshing?}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\center
+			\includegraphics[width=\textwidth]{img/input.png}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\center
+			\includegraphics[width=\textwidth]{img/output-pure.png}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Triangle Meshes}
+\frametitle{Triangle Meshes}
+	\center
+	\includegraphics[width=\textwidth]{img/triangles.png}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Quad Meshes}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Quad-dominant Meshes}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\centering
+			Quad-dominant Mesh
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\centering
+			Pure Quad Mesh
+		\end{column}
+	\end{columns}
+	\includegraphics[width=\textwidth]{img/Quad.png}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Uniformity \& Isotropy}
+	\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Uniformity]
+		Faces are of the same size
+	\end{tcolorbox}
+	\pause
+	\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Isotropy]
+		Uniformity of directions
+	\end{tcolorbox}
+	\pause
+	$\Rightarrow$ Uniform and isotropic mesh:
+	\begin{itemize}
+		\item Equilateral triangles (Triangle Mesh)
+		\item Squares (Quad Mesh)
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Remeshing}
+	\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Correlation Problem]
+		Finding the location of a new vertex on the input surface
+	\end{tcolorbox}
+	\pause
+	\centering
+	~\\
+	\begin{tabular}{c|c}
+		\textbf{Global Remeshing} & \textbf{Local Remeshing} \\
+		\hline
+		Create new output mesh & Modify input mesh
+	\end{tabular}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Global Remeshing}
+	\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Mesh Parameterization]
+		Mapping between meshes of the same surface
+	\end{tcolorbox}
+	\pause
+	~\\
+	Solves the correspondence problem\\
+	{\color{mygreen} $\Rightarrow$ High quality meshes and globally optimal}\\
+	\pause
+	~\\
+	Challenging to compute\\
+	{\color{red} $\Rightarrow$ High time and design complexity}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Local Remeshing}
+	Modify the initial mesh connectivity using topological operations\\
+	\pause
+	~\\
+	Limited to local information around each vertex\\
+	{\color{red} $\Rightarrow$ Lower quality meshes and not globally optimal}\\
+	\pause
+	~\\
+	Easy to compute and parallelize \\
+	{\color{mygreen} $\Rightarrow$ Low time and design complexity}
 \end{frame}
 
+\iffalse
 \begin{frame}
 	\frametitle{$N$-RoSy Fields}
+	\only<-2,4->{
+		\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=$N$-way Rotational Symmetry]
+			Shape that is invariant under rotations by a multiple of $\frac{2\pi}{N}$
+		\end{tcolorbox}
+		\pause
+		~\\
+		Can be thought of as vector fields with $N$ vectors at each point\\
+		\pause
+		~\\
+		Symmetries on surfaces:
+		\begin{itemize}
+			\item	\textbf{Intrinsic:} Preserve geodesic distances
+			\item	\textbf{Extrinsic:} Preserve euclidean distances
+		\end{itemize}
+
+	}
+	\only<3>{
+		\centering
+		\includegraphics[width=\textwidth]{img/n-Rosy-Singularity.png}
+	}
 \end{frame}
+\fi
 
 % METHOD
 
 \begin{frame}
 	\frametitle{Method}
+	Combines ideas of global and local remeshing\\
+	\pause
+	~\\
+	\textbf{Input:} mesh, point cloud, etc.\\
+	~\\
+	\pause
 	\begin{enumerate}
 		\item	Transform input into a graph
 		\item	Calculate the orientation field
 		\item	Calculate the position field
 		\item	Export the mesh
 	\end{enumerate}
+	~\\
+	\pause
+	\textbf{Output:} uniform, isotropic triangle / quad(-based) mesh
 \end{frame}
 
 \begin{frame}
 	\frametitle{Input Representation}
+	Weighted directed graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$:
+	\begin{itemize}
+		\item	Vertex $i \in \mathcal{V}$: position and normal direction $v_i, n_i \in \mathbb{R}^3$
+		\pause
+		\item	$\mathcal{E} \subseteq \mathcal{V} \times \mathcal{V}$:
+				\begin{itemize}
+					\item	Meshes: Usual set of edges
+					\item	Point Clouds: $K$-nearest neighbors by distance
+				\end{itemize}
+		\pause
+		\item	$(i,j) \in \mathcal{E}$: weights $w_{ij}$ $\rightarrow$ affect orientation- \& position field
+	\end{itemize}
+	\pause
+	~\\
+	$\Rightarrow$ Simplicity allows for broad application
+\end{frame}
+
+\begin{frame}
+	\frametitle{Fields}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\textbf{1. Orientation Field}\\
+			\begin{itemize}
+				\item	$s_o$-RoSy field
+				\item	Guides edges in the output mesh
+			\end{itemize}
+		\end{column}
+		\pause
+		\begin{column}{0.5\textwidth}
+			\textbf{2. Position Field}\\
+			\begin{itemize}
+				\item	Uses the orientation field
+				\item	Specifies the location of vertices in the output mesh
+			\end{itemize}
+		\end{column}
+	\end{columns}
+	\pause
+	~\\~\\
+	Input parameters:
+	\begin{itemize}
+		\item	Type of mesh:
+				\begin{itemize}
+					\item	Triangle mesh: $s_o=6$
+					\item	Quad-dominant mesh: $s_o=4$
+				\end{itemize}
+		\item	Desired edge length: $\rho$
+		\item	Intrinsic or extrinsic optimization
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Orientation Field}
+	\centering
+	\includegraphics[width=\textwidth]{img/orientation-field-illustration.png}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Orientation Field}
+	Idea:
+	\begin{itemize}
+		\item	Output mesh should be uniform and isotropic
+		\item	Therefore there are rotational symmetries in the output mesh
+		\item	Thus we compute an $s_o$-RoSy field
+	\end{itemize}
+	\pause
+	~\\
+	\begin{columns}
+		\begin{column}{0.7\textwidth}
+			Let $o_i \in \mathbb{R}^3$ be a directional representation vector for each $i \in \mathcal{V}$.\\
+
+			\pause
+			\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Symmetry Group - Integer Rotations]
+				$\mathcal{R}_{s_o}(o,n,k) \coloneqq \rot \left(n, k \cdot \frac{2\pi}{s_o} \right) o, \quad k \in \mathbb{Z}$ \\
+				$\mathcal{R}_{s_o}(o,n) \coloneqq \mathcal{R}_{s_o}(o,n,0, \dots, s_o-1)$
+			\end{tcolorbox}
+		\end{column}
+		\begin{column}{0.2\textwidth}
+			\centering
+			\includegraphics[width=\textwidth]{img/integer-rotation.png}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Orientation Field}
+	Orientation field $O$ consists of $\mathcal{R}_{s_o}(o_i,n_i)$ for every $i \in \mathcal{V}$\\
+	$\Rightarrow$ Smooth out the orientation field\\
+	$\Rightarrow$ Minimize angles between adjacent vertices\\
+	\pause
+	~\\
+	Let $k_{ij} \in \{0, \dots, s_o-1\}$ for each $(i,j) \in \mathcal{E}$.\\
+\end{frame}
+
+\begin{frame}
+	\frametitle{Orientation Field - Optimization}
+	\includegraphics[width=\textwidth]{img/orientation-field-intrinsic-extrinsic-horizontal.png}
+
+	~\\~\\
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\textbf{Intrinsic Smoothness Energy:}\\
+			$\sum\limits_{(i,j) \in \mathcal{E}} \angle(o_i, \mathcal{R}_{s_o}(o_{ji}, n_i, k_{ij}))^2$\\~\\~\\
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\textbf{Extrinsic Smoothness Energy:}\\
+			$\sum\limits_{(i,j) \in \mathcal{E}} \angle(\mathcal{R}_{s_o}(o_{i}, n_i, k_{ij}),$\\
+			\qquad\qquad $\mathcal{R}_{s_o}(o_{j}, n_j, k_{ji}))^2$
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Orientation Field - Intrinsic Optimization}
+	\begin{algorithm}[H]
+		\For{$i \in \mathcal{V}$}
+		{
+			\For{$j \in \mathcal{N}(i)$}
+			{
+				\tcp{brute force "smoothest" $k_{ij}$}
+				$k_{ij} \leftarrow \argmin\limits_{0 \leq k' < s_0} \angle(o_i, \mathcal{R}_{s_o}(o_{ji}, n_i, k'))$
+			}
+			\tcp{optimize $o_i$ by rotation}
+			$o_i \leftarrow \sum\limits_{j \in \mathcal{N}(i)} w_{ij} \cdot \mathcal{R}_{s_o}(o_{ji}, n_i, k_{ij})$\\
+			$o_i \leftarrow \frac{o_i}{\Vert o_i \Vert}$
+		}
+	\end{algorithm}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Orientation Field}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\center
+			\includegraphics[width=\textwidth]{img/orientation.png}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\center
+			\includegraphics[width=\textwidth]{img/output-pure.png}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Position Field}
+	\centering
+	\includegraphics[width=\textwidth]{img/position-field-illustration.png}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Position Field}
+	Idea:
+	\begin{itemize}
+		\item	Use the orientation field $O$ to determine the position of vertices in the output mesh
+		\item	Per-vertex local parameterization with fixed gradient $o_i$
+		\item	Space vertices along edges $\rho$ units apart
+	\end{itemize}
+	\pause
+	~\\
+	\begin{columns}
+		\begin{column}{0.7\textwidth}
+			\begin{tcolorbox}[colback=green!5,colframe=green!40!black,title=Symmetry Group - Integer Translations]
+				$\mathcal{T}_{s_o}(p,n,o,t) \coloneqq p + \rho \cdot \sum\limits_{k=0}^{\frac{s_o}{2}-1} t_k \mathcal{R}_{s_o}(o,n,k)$ \\
+				$\mathcal{T}_{s_o}(p,n,o) \coloneqq \left\{\mathcal{T}_{s_o}(p,n,o,t) \vert t \in \mathbb{Z}^{\frac{s_o}{2}}\right\}$
+			\end{tcolorbox}
+		\end{column}
+		\begin{column}{0.2\textwidth}
+			\centering
+			\includegraphics[width=\textwidth]{img/integer-translation.png}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Position Field}
+	Position field $P$ consists of local parameterizations $\mathcal{T}_{s_o}(p_i,n_i,o_i)$ for every $i \in \mathcal{V}$\\
+	$\Rightarrow$ Smooth out the position field\\
+	$\Rightarrow$ Minimize differences between local parameterizations of adjacent vertices\\
+	\pause
+	~\\
+	Let $t_{ij} \in \mathbb{Z}^{\frac{s_o}{2}}$ for each $(i,j) \in \mathcal{E}$.\\
 \end{frame}
 
 \begin{frame}
-	\frametitle{Multiresolution Hierarchy}
+	\frametitle{Position Field - Optimization}
+	\includegraphics[width=\textwidth]{img/position-field-intrinsic-extrinsic-horizontal.png}
+
+	~\\~\\
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\textbf{Intrinsic Smoothness Energy:}\\
+			$\sum\limits_{(i,j) \in \mathcal{E}} \Vert p_i - \mathcal{T}_{s_o}(p_{ji}, n_i, o_i, t_{ij}) \Vert^2_2$\\~\\~\\
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\textbf{Extrinsic Smoothness Energy:}\\
+			$\sum\limits_{(i,j) \in \mathcal{E}} \Vert \mathcal{T}_{s_o}(p_i, n_i, o_i, t_{ij}) -$\\
+			\qquad\quad $\mathcal{T}_{s_o}(p_j, n_j, o_j, t_{ji}) \Vert^2_2$
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Position Field - Intrinsic Optimization}
+	\begin{algorithm}[H]
+		\For{$i \in \mathcal{V}$}
+		{
+			\For{$j \in \mathcal{N}(i)$}
+			{
+				\tcp{brute force "smoothest" $t_{ij}$}
+				$t_{ij} \leftarrow \argmin\limits_{t' \in Q_{ij}} \Vert p_i - \mathcal{T}_{s_o}(p_{ji}, n_i, o_i, t')) \Vert$
+			}
+			\tcp{optimize $p_i$ by translation}
+			$p_i \leftarrow \frac{\sum\limits_{j \in \mathcal{N}(i)} w_{ij} \cdot \mathcal{T}_{s_o}(p_{ji}, n_i, o_i, t_{ij})}{\sum\limits_{j \in \mathcal{N}(i)} w_{ij}}$\\
+		}
+	\end{algorithm}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Position Field}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\center
+			\includegraphics[width=\textwidth]{img/position.png}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\center
+			\includegraphics[width=\textwidth]{img/output-pure.png}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Mesh Extraction}
+	Idea:
+	\begin{enumerate}
+		\item	Create new undirected graph $\mathcal{G}' \coloneqq (\mathcal{V}', \mathcal{E}')$
+		\item	Add all $p_i$ to $\mathcal{V'}$
+		\pause
+		\item	Connect $(p_i, p_j)$ if $t_{ij}$ is unit vector-valued\\
+				$\Rightarrow$ $p_i$ and $p_j$ are just apart by $\rho$
+		\pause
+		\item	In ascending distance $\Vert p_i - p_j \Vert$:\\
+				Connect $(p_i, p_j)$ if $t_{ij} = -t_{ji}$
+	\end{enumerate}
+	\pause
+	~\\
+	$\mathcal{G}'$ has now the final structure of the mesh
 \end{frame}
 
 % Comparison
 \begin{frame}
-	\frametitle{Comparison}
+	\frametitle{Comparison - Quality}
+	\centering
+	\includegraphics[width=0.6\textwidth]{img/quality.png}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Comparison}
+	\frametitle{Comparison - Computation Time}
+	\centering
+	\includegraphics[width=\textwidth]{img/computation-time.png}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Conclusion}
+	\begin{itemize}
+		\item	Quality issues (singularities) need to be dealt with
+		\item	Linear computation time makes it great for practical usage
+		\item	Simplicity in design and modularity\\
+				$\Rightarrow$ Optimization steps can be used in other work
+	\end{itemize}
 \end{frame}
 
 % References

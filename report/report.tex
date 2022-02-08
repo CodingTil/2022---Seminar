@@ -101,7 +101,7 @@ When modeling triangle meshes, it is not uncommon for the resulting meshes to be
 \subsection{Global and local remeshing}\label{global-local-remeshing}
 As mentioned earlier, many meshes are created using automated methods such as 3D scanning, which often results in poor quality meshes. For many geometry processing algorithms, these meshes are unsatisfactory and lead to performance and quality losses. Therefore, there is a need to reduce the complexity of these meshes, improve their quality, and sometimes even transform them into a completely different type of mesh. This process is referred to as \textbf{remeshing} \cite{alliez2008recent}.\bigskip
 
-Although there are several central problems with all remeshing methods, one particularly complex problem is finding the appropriate location of a new vertex in the output mesh on the input mesh. To deal with this, there are generally speaking two approaches: Either create an entirely new mesh for an output, or modify the input mesh to create the output mesh. Here, all remeshing methods are divided into two classes: Global remeshing and local remeshing \cite{botsch2007geometric,alliez2008recent}.\bigskip
+Although there are several central problems with all remeshing methods, one particularly complex problem is finding the appropriate location of a new vertex in the output mesh on the input surface. To deal with this, there are generally speaking two approaches: Either create an entirely new mesh for an output, or modify the input mesh to create the output mesh. Here, all remeshing methods are divided into two classes: Global remeshing and local remeshing, respectively \cite{botsch2007geometric,alliez2008recent}.\bigskip
 
 \textbf{Global remeshing} solves the correspondence problem by creating a completely new mesh through parameterization of the input mesh. In mesh parameterization, a parametric equation is found for the surface of the mesh. Since the input and output meshes should represent the same surface, it is quite easy to find the corresponding position of a new vertex on the input mesh, provided that the parametric equation is known. Herein lies the major drawback of this global approach: determining the parametric equation of a surface is a challenge that can be, among other things, very computationally intensive and inaccurate. However, once the input mesh is successfully parameterized, a new high-quality mesh can be generated quite easily \cite{jakob2015instant,alliez2008recent}.
 
@@ -174,7 +174,7 @@ Basically, it takes a graph representation of the geometry's surface as an input
 
 % Input
 \subsection{Input representation}
-As mentioned before, the algorithm takes as input the surface of the geometry represented as a graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$. Each element $i \in \mathcal{V}$ is called a vertex and represents a position $v_i \in \mathbb{R}^3$ and a normal direction $n_i \in \mathbb{R}^3$ on the surface. $\mathcal{E} \subset \mathcal{V} \times \mathcal{V}$, also called the set of edges, stores neighboring vertices in the graph. It is defined differently depending on the original geometric representation:
+As mentioned before, the algorithm takes as input the surface of the geometry represented as a graph $\mathcal{G} = (\mathcal{V}, \mathcal{E})$. Each element $i \in \mathcal{V}$ is called a vertex and represents a position $v_i \in \mathbb{R}^3$ and a normal direction $n_i \in \mathbb{R}^3$ on the surface. $\mathcal{E} \subseteq \mathcal{V} \times \mathcal{V}$, also called the set of edges, stores neighboring vertices in the graph. It is defined differently depending on the original geometric representation:
 \begin{itemize}
 	\item	For meshes, $\mathcal{E}$ is equal to the usual set of edges in the mesh.
 	\item	For point clouds, $(i,j) \in \mathcal{E}$ if the vertex $i$ is in the set of $K$-nearest neighbors by distance of $j$.
@@ -243,14 +243,14 @@ While \cite{bommes2009mixed} proposed to minimize the smoothness energy globally
 
 Whenever the iteration visits the vertex $i$, the algorithm first determines optimal integer variables $k_{ij}$ by a brute-force search:
 \begin{equation}\label{eq:orientation-intrinsic-integer}
-	k_{ij} \coloneqq \argmin_{0 \leq k' < s_o} \angle(o_j, \mathcal{R}_{s_o}(o_ji, n_i, k'))
+	k_{ij} \coloneqq \argmin_{0 \leq k' < s_o} \angle(o_i, \mathcal{R}_{s_o}(o_{ji}, n_i, k'))
 \end{equation}
 In this way, the algorithm can already find improved values for $\mathcal{R}_{s_o}(o_{ji}, n_i, k_{ij})$ in the smoothness energy equation \eqref{eq:orientation-isotropic-energy}.
 
 Furthermore, the representative direction vector $o_i$ can be optimized, i.e. rotated, by:
 \begin{equation}\label{eq:orientation-intrinsic-vector}
 \begin{split}
-	& o_i \leftarrow \sum_{j \in \mathbb{N}(i)} w_{ij} \cdot \mathcal{R}_{s_o}(o_{ji}, n_i, j_{ij})\\
+	& o_i \leftarrow \sum_{j \in \mathbb{N}(i)} w_{ij} \cdot \mathcal{R}_{s_o}(o_{ji}, n_i, k_{ij})\\
 	& o_i \leftarrow \frac{o_i}{\Vert o_i \Vert}
 \end{split}
 \end{equation}
@@ -274,7 +274,7 @@ This intrinsic calculation has a disadvantage: Two vectors are always folded int
 To do so, we must apply some modifications to the previous formulas:
 The extrinsic smoothness formula is now:
 \begin{equation}\label{eq:orientation-extrinsic-energy}
-	E_e(O,k) \coloneqq \sum_{i \in \mathcal{V}} \sum_{j \in \mathcal{N}(i)} \angle(\mathcal{R}_{s_o}(o_{i}, n_i, k_{ij}), \mathcal{R}_{s_o}(o_{ji}, n_j, k_{ji}))^2,
+	E_e(O,k) \coloneqq \sum_{i \in \mathcal{V}} \sum_{j \in \mathcal{N}(i)} \angle(\mathcal{R}_{s_o}(o_{i}, n_i, k_{ij}), \mathcal{R}_{s_o}(o_{j}, n_j, k_{ji}))^2,
 \end{equation}
 The brute force search from equation \eqref{eq:orientation-intrinsic-integer} now changes to the following:
 \begin{equation}\label{eq:orientation-extrinsic-integer}
@@ -432,7 +432,7 @@ Finally, the output mesh can be extracted from $\mathcal{G}'$, which now contain
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Results
-\section{Results and Discussion}\ref{results}
+\section{Results and Discussion}\label{results}
 The simplicity and locality of operations in the Instant Field-Aligned Meshes method lead to incredible scalability, efficiency, and robustness compared to global approaches.
 
 \begin{figure}[htb!]
